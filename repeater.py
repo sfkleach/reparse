@@ -28,4 +28,4 @@ class Repeater:
 			return None
 
 	def pushbackOptChar( self, char ):
-		self._pushed.append( char )
+		self._pushed.appendleft( char )
