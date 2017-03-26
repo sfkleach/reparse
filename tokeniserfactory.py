@@ -46,8 +46,10 @@ class Tokeniser:
                     return token
                 else:
                     self._state = move.destination()
-            else:
+            elif ch:
                 raise Exception( 'Unexpected character: {}'.format( ch ) )
+            else:
+                raise Exception( 'Unexpected end of input (in state {})'.format( self._state ) )
                 
     def __next__( self ):
         token = self.nextOptToken()
