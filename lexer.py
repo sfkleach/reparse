@@ -1,141 +1,145 @@
 import abc
 from collections import deque
+from repeater import Repeater
 
-class TokenIterator:
+class Tokeniser:
 
-	def __init__( self, rules, source ):
-		self._state = rules.start()
-		self._rules = rules
-		self._source = source
-		self._sofar = []
-		self._pushed = deque()
-		self._last_char = None
+    def __init__( self, rules, repeater ):
+        self._state = rules.startState()
+        self._rules = rules
+        self._repeater = repeater
+        self._sofar = []
+        self._pushed_tokens = []
 
-	def nextChar( self ):
-		'''Returns the next character from the input stream. When the
-		input stream is empty it returns None the first time it is called
-		and throws StopIteration after that.
-		'''
-		if self._pushed:
-			return self._pushed.popleft()
-		elif self._source: 
-			try:
-				line = self._source.__next__()
-				self._pushed.extend( line )
+    def __iter__( self ):
+        return self
 
-				# This test is necessary to cope with bad iterators that
-				# return the empty string.
-				if self._pushed:
-					return self._pushed.popleft()
-				else:
-					self._source = None
-					return None
-			except StopIteration:
-				self._source = None
-				return None
-		else:
-			raise StopIteration
+    def collected( self ):
+        return ''.join( self._sofar )
 
-	def __iter__( self ):
-		return self
+    def collectedArray( self ):
+        return ''.join( self._sofar )
 
-	def __next__( self ):
-		while True:
-			ch = self.nextChar()
+    def pushToken( self, t ):
+        self._pushed_tokens.append( t )
 
-			# print( 'Next char is: {}. Current state is: {}.'.format( ch, self._state ) )
-			# print( ' Pushed = ' + str( self._pushed ) )
-			# print( ' Collected = ' + str( self._sofar ) )
-			move = self._rules.findMove( self._state, ch )
+    def pushbackOptChar( self, optch ):
+        self._repeater.pushbackOptChar( optch )
 
-			if move:
-				move.processChar( ch, self._sofar, self._pushed )
-				if move.isTerminus():
-					accepted = self._sofar
-					self._sofar = []
-					self._state = self._rules.start()
-					return move.result( accepted )
-				else:
-					self._state = move.destination()
-			else:
-				raise Exception( 'Unexpected character: {}'.format( ch ) )
+    def acceptOptChar( self, optch ):
+        self._sofar.append( optch )
+
+    def nextOptToken( self ):
+        if self._pushed_tokens:
+            return self._pushed_tokens.pop()
+        while True:
+            ch = self._repeater.nextOptChar()
+            move = self._rules.findMove( self._state, ch )
+            # print( 'Next char is: {}. Current state is: {}.'.format( ch, self._state ) )
+            # print( ' Collected = ' + str( self._sofar ) )
+            if move:
+                move.processOptChar( ch, self )
+                if move.isTerminus():
+                    token = move.result( self )
+                    self._state = self._rules.resetState()
+                    self._sofar.clear()
+                    return token
+                else:
+                    self._state = move.destination()
+            else:
+                raise Exception( 'Unexpected character: {}'.format( ch ) )
+                
+    def __next__( self ):
+        token = self.nextOptToken()
+        if token:
+            return token
+        else:
+            raise StopIteration
 
 class Move:
 
-	def __init__( self, test, dst, *extras ):
-		self._test = test
-		self._dst = dst
-		self._is_terminus = hasattr( dst, "__call__" )
-		self._extras = extras
+    def __init__( self, test, dst, *extras ):
+        self._test = test
+        self._dst = dst
+        self._is_terminus = hasattr( dst, "__call__" )
+        self._extras = extras
 
-	def destination( self ):
-		return self._dst
+    def destination( self ):
+        return self._dst
 
-	def allows( self, ch ):
-		if self._test == True:
-			return ch
-		elif self._test:
-			return ch in self._test
-		else:
-			return not( self._test )
+    def allows( self, optch ):
+        if self._test == True:
+            return optch
+        elif self._test:
+            if hasattr( self._test, "__call_" ):
+                return self._test( optch )
+            else:
+                return optch in self._test
+        else:
+            return not( self._test )
 
-	def isTerminus( self ):
-		return self._is_terminus
+    def isTerminus( self ):
+        return self._is_terminus
 
-	def result( self, collected ):
-		return self._dst( collected )
+    def result( self, tokeniser ):
+        return self._dst( tokeniser )
 
-	@abc.abstractmethod
-	def doMove( self, ch, collected ): pass
+    @abc.abstractmethod
+    def doMove( self, ch, tokeniser ): pass
 
-	def processChar( self, ch, collected, pushed ):
-		for e in self._extras:
-			e( collected, pushed=pushed )
-		self.doMove( ch, collected, pushed )
+    def processOptChar( self, optch, tokeniser ):
+        for e in self._extras:
+            e( tokeniser )
+        self.doMove( optch, tokeniser )
 
 class Accept( Move ):
-	def doMove( self, ch, collected, pushed ):
-		collected.append( ch )
+    def doMove( self, optch, tokeniser ):
+        tokeniser.acceptOptChar( optch )
 
 class Erase( Move ):
-	def doMove( self, ch, collected, pushed ):
-		pass
+    def doMove( self, optch, tokeniser ):
+        pass
 
 class Pushback( Move ):
-	def doMove( self, ch, collected, pushed ):
-		pushed.append( ch )
+    def doMove( self, optch, tokeniser ):
+        tokeniser.pushbackOptChar( optch )
 
 class MoveSet:
 
-	def __init__( self, *moves ):
-		self._moves = moves
+    def __init__( self, *moves ):
+        self._moves = moves
 
-	def __iter__( self ):
-		return iter( self._moves )
-		
-class TokenRules:
-	'''This is a casual implementation of a transition-diagram
-	based tokeniser that has a lot of scope for optimisation.
-	Since I am just doing a prototype, I won't bother with that.
-	'''
-	
-	def __init__( self, start_node, node_dict ): 
-		self._start_state = start_node
-		self._moveset_dict = node_dict
-
-	def findMove( self, state, ch ):
-		for move in self._moveset_dict[ state ]:
-			if ch and move.allows( ch ):
-				return move
-			elif not( ch ) and move.isTerminus():
-				return move
-		return None
-
-	def start( self ):
-		return self._start_state
-
-	def __call__( self, source ):
-		return TokenIterator( self, source )
+    def __iter__( self ):
+        return iter( self._moves )
+        
+class TokeniserFactory:
+    '''This is a casual implementation of a transition-diagram
+    based tokeniser that has a lot of scope for optimisation.
+    Since I am just doing a prototype, I won't bother with that.
+    '''
+    
+    def __init__( self, node_dict, start=None, reset=None ): 
+        self._moveset_dict = node_dict
+        if start in self._moveset_dict:
+            self._start_state = start
+        else:
+            raise Exception( 'Start state must be a named rule' )
+        self._reset_state = reset if reset else self._start_state
 
 
+    def findMove( self, state, optch ):
+        for move in self._moveset_dict[ state ]:
+            if optch and move.allows( optch ):
+                return move
+            elif not( optch ) and move.isTerminus():
+                return move
+        return None
 
+    def startState( self ):
+        return self._start_state
+
+    def resetState( self ):
+        return self._reset_state
+
+    def __call__( self, source ):
+        return Tokeniser( self, Repeater( source ) )
