@@ -1,0 +1,69 @@
+Here’s a simple example to convert from a file with three fixed width columns (5,10,20) to CSV.
+ 
+Example Script
+    Header[1]: 'Col One'
+    Header[2]: 'Col Two'
+    Header[3]: 'Col Three'
+    Print Repeat: /^(.{5})(.{10})(.{20})$/
+             
+Example Input:
+    How  Now       Brown Cow
+    Mary Had       A Little Lamb
+    HumptDumpty    Sat On a Wall
+ 
+Expected Output:
+    Col One,Col Two,Col Three
+    How,Now,Brown Cow
+    Mary,Had,A Little Lamb
+    Humpt,Dumpty,Sat On a Wall
+
+Here’s a reasonably full example that shows the general idea that takes a fixed-format ASCII file on the input and generates JSON on the output with validation.
+ 
+Example Script #2
+ 
+    # Parse a fixed format input consisting of two white-space padded fixed width fields.
+    Input Encoding: 'ASCII'
+     
+    # Define the mapping from capture groups to columns; also naming and ordering the columns.
+    # Note that D is the date captured in the header line.
+    Header[D]: 'Date'
+    Header[2]: 'Type'
+    Header[1]: 'Description'
+     
+    # Set the output format.
+    Output Encoding: 'UTF-8'
+    Output Format: 'JSON'
+     
+    # The first line of the file is expected to contain the date, which is captured and given the name D.
+    # Regexs are enclosed between slashes (a common convention).
+    Require: //DATA FILE (.*)//
+        Transform[1 -> D]: Copy
+     
+    Until: //END OF DATA//
+        # While will repeatedly match records that fit the 30,10 fixed width format.
+        Print Require: //(.{30})(.{10})//
+            # Both capture groups have their whitespace trimmed.
+            Transform[*]: Trim
+            # The second capture group is expected to be 013 or 014 and has to be mapped.
+            # A series of regex substitutions are applied.
+            Transform[2]: Decode( //013//, 'Speed', //014//, 'Drunk', Error('Invalid code') )
+     
+    # No further input is allowed.
+    Done
+             
+ 
+Example Input:
+    DATA FILE 20/Oct/2017
+    Speed >30 in residential zone 013
+    Speed >national speed limit   013
+    Driving while intoxicated     014
+    I am a bad record
+    Other bad record              015
+    END OF DATA
+Expected output:
+    [{"Date":"20/Oct/2017", "Type":"Speed", "Description":"Speed >30 in residential zone"},
+    {"Date":"20/Oct/2017", "Type":"Speed", "Description":"Speed >national speed limit"},
+    {"Date":"20/Oct/2017", "Type":"Drunk", "Description":"Driving while intoxicated"}]
+Expected errors:
+    Invalid record, line 5: I am a bad record
+    Invalid code, line 6: 015
