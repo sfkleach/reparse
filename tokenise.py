@@ -7,6 +7,7 @@ class TokenType( enum.Enum ):
 	RegexLiteral = enum.auto()
 	NumLiteral = enum.auto()
 	Indent = enum.auto()
+	Keyword = enum.auto()
 
 class Token:
 
@@ -45,14 +46,38 @@ ReparseTokeniserFactory = (
 			    MoveSet(
 			        Erase( '\n', "StartLine" ),
 			        Erase( ' \t', "StartToken" ),
-			        Accept( True, "Symbol" ),
+			        Accept( '[]:', lambda t: ( TokenType.Keyword, t.collected() ) ),
+			        Accept( lambda x: x.isalpha(), "Symbol" ),
+			        Accept( lambda x: x.isnumeric(), "Num" ),
+			        Erase( '"', "String" ),
+			        Accept( '/', "Slash" ),
 			        Pushback( None, lambda t: None )
 			    ),
+			"Slash":
+				MoveSet(
+					Accept( '/', "Regex" ),
+					Pushback( True, lambda t: ( TokenType.Symbol, t.collected() ) ),
+					Pushback( None, lambda t: ( TokenType.Symbol, t.collected() ) )
+				),
+			"Regex":
+				TO BE DONE
 			"Symbol":
 				MoveSet(
 			        Pushback( ' \t\n', lambda t: ( TokenType.Symbol, t.collected() ) ),
-			        Accept( True, "Symbol" ),
+			        Accept( lambda x: x.isalnum() or x == '_', "Symbol" ),
+			        Pushback( True, lambda t: ( TokenType.Symbol, t.collected() ) ),
 			        Pushback( None, lambda t: ( TokenType.Symbol, t.collected() ) )
+				),
+			"Num":
+				MoveSet(
+					Accept( lambda x: x.isnumeric(), "Num" ),
+			        Pushback( True, lambda t: ( TokenType.NumLiteral, t.collected() ) ),
+			        Pushback( None, lambda t: ( TokenType.NumLiteral, t.collected() ) )
+				),
+			"String":
+				MoveSet(
+					Erase( '"', lambda t: ( TokenType.StringLiteral, t.collected() ) ),
+					Accept( True, "String" )
 				)
 	    },
 	    start="StartLine",

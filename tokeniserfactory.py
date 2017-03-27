@@ -70,15 +70,17 @@ class Move:
         return self._dst
 
     def allows( self, optch ):
+        # if optch == '1':
+        #     print( 'here {}'.format( self._test ) )
         if self._test == True:
             return optch
         elif self._test:
-            if hasattr( self._test, "__call_" ):
+            if hasattr( self._test, "__call__" ):
                 return self._test( optch )
             else:
                 return optch in self._test
         else:
-            return not( self._test )
+            return not( optch )
 
     def isTerminus( self ):
         return self._is_terminus
@@ -135,7 +137,10 @@ class TokeniserFactory:
                 return move
             elif not( optch ) and move.isTerminus():
                 return move
-        return None
+        if optch:
+            raise Exception( 'Unexpected character: {}'.format( optch ) )
+        else:
+            raise Exception( 'Unexpected end of input' )
 
     def startState( self ):
         return self._start_state
