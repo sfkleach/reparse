@@ -29,25 +29,32 @@ class Tokeniser:
     def acceptOptChar( self, optch ):
         self._sofar.append( optch )
 
+    def clearAccepted( self ):
+        self._sofar.clear()
+
     def nextOptToken( self ):
         if self._pushed_tokens:
             return self._pushed_tokens.pop()
         while True:
-            ch = self._repeater.nextOptChar()
-            move = self._rules.findMove( self._state, ch )
-            # print( 'Next char is: {}. Current state is: {}.'.format( ch, self._state ) )
+            optch = self._repeater.nextOptChar()
+            move = self._rules.findMove( self._state, optch )
+            # print( 'Next char is: {}. Current state is: {}.'.format( optch, self._state ) )
             # print( ' Collected = ' + str( self._sofar ) )
             if move:
-                move.processOptChar( ch, self )
+                # print( 'BEFORE', optch, self._sofar, move )
+                move.processOptChar( optch, self )
+                # print( 'AFTER', optch, self._sofar )
                 if move.isTerminus():
+                    # print( 'SOFAR', self._sofar, optch, self._state )
                     token = move.result( self )
+                    # print( 'TOKEN', token )
                     self._state = self._rules.resetState()
                     self._sofar.clear()
                     return token
                 else:
                     self._state = move.destination()
-            elif ch:
-                raise Exception( 'Unexpected character: {}'.format( ch ) )
+            elif optch:
+                raise Exception( 'Unexpected character: {}'.format( optch ) )
             else:
                 raise Exception( 'Unexpected end of input (in state {})'.format( self._state ) )
                 
@@ -72,15 +79,20 @@ class Move:
     def allows( self, optch ):
         # if optch == '1':
         #     print( 'here {}'.format( self._test ) )
-        if self._test == True:
+        if self._test is True:
             return optch
         elif self._test:
-            if hasattr( self._test, "__call__" ):
-                return self._test( optch )
+            if optch:
+                if hasattr( self._test, "__call__" ):
+                    return self._test( optch )
+                else:
+                    return optch in self._test
             else:
-                return optch in self._test
-        else:
+                return False
+        elif self._test is None:
             return not( optch )
+        else:
+            raise Exception( 'Invalid test: {} ({})'.format( self, type(self._test) ))
 
     def isTerminus( self ):
         return self._is_terminus
@@ -133,9 +145,7 @@ class TokeniserFactory:
 
     def findMove( self, state, optch ):
         for move in self._moveset_dict[ state ]:
-            if optch and move.allows( optch ):
-                return move
-            elif not( optch ) and move.isTerminus():
+            if move.allows( optch ):
                 return move
         if optch:
             raise Exception( 'Unexpected character: {}'.format( optch ) )
