@@ -8,3 +8,6 @@ def test_parse():
 	# 	print( 'TOKEN', t.tokenValue() )
 	p = parse.ReparseParser( tokenise.ReparseTokeniserFactory( io.StringIO( text ) ) )
 	print( p.readStatements() )
+
+if __name__ == "__main__":
+    test_parse()

@@ -15,3 +15,4 @@ THETA
 def test_dents():
 	for t in dents.Dent( tokenise.ReparseTokeniserFactory( io.StringIO( TEXT ) ) ):
 		print( t )
+		

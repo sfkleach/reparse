@@ -63,7 +63,7 @@ class ReparseParser:
 				else:
 					raise Exception( 'Not implemented yet: {}'.format( v ) )
 			else:
-				raise Exception( 'Not implemented yet' )
+				raise Exception( 'Not implemented yet: {}'.format( t.tokenType() ) )
 		else:
 			return None
 
@@ -76,7 +76,7 @@ class ReparseParser:
 		return SetHeader( title, num )
 
 	def readPrintRepeat( self ):
-		self.mustReadToken( TokenType.Keyword, ':' )		
+		# self.mustReadToken( TokenType.Keyword, ':' )		
 		regex = self.readRegexLiteral()
 		return Repeat( regex, Print() )
 

@@ -13,29 +13,30 @@ class Dent:
 		except:
 			return ''
 
-	def dent( self, token ):
-		if token and token.isIndentation():
-			v = token.tokenValue()
-			if v == self.previous():
-				return token
-			else:
-				print( 'COMPARE', len( self.previous() ), len( v ) )
-				print( 'Stack', self._previous )
-				if v.startswith( self.previous() ):
-					self._previous.append( v )
-					return Token( TokenType.Indentation, 1 )
-				elif self.previous().startswith( v ):
-					self._previous.pop()
-					return Token( TokenType.Indentation, -1 )
-				elif self.previous() == v:
-					return token
-				else:
-					raise Exception( 'Indentation mixes tabs and spaces' )
-		else:
-			return token
-
 	def nextOptToken( self ):
-		return self.dent( self._token_src.nextOptToken() )
+		while True:
+			token = self._token_src.nextOptToken()
+			if token and token.isIndentation():
+				v = token.tokenValue()
+				if v == self.previous():
+					continue
+				else:
+					# print( 'COMPARE', len( self.previous() ), len( v ) )
+					# print( 'Stack', self._previous )
+					if v.startswith( self.previous() ):
+						# It is a new, deeper indentation level.
+						# Record the nesting level.
+						self._previous.append( v )
+						# Return an indent.
+						return Token( TokenType.Indentation, 1 )
+					else:
+						# It is a shallower indentation level.
+						# Keep popping the stack and pushing outdents.
+						self._previous.pop()
+						self._token_src.pushToken( token )
+						return Token( TokenType.Indentation, -1 )
+			else:
+				return token
 
 	def __next__( self ):
 		t = self.nextOptToken()
