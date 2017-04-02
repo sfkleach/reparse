@@ -1,17 +1,25 @@
+Reparse - a tool for processing tabular input using regexs
+==========================================================
+
+Initial Vision
+--------------
 Here’s a simple example to convert from a file with three fixed width columns (5,10,20) to CSV.
  
 Example Script
-    Header[1]: 'Col One'
-    Header[2]: 'Col Two'
-    Header[3]: 'Col Three'
+
+    Header[1]: Title="Col One"
+    Header[2]: Title="Col Two"
+    Header[3]: Title="Col Three"
     Print Repeat: /^(.{5})(.{10})(.{20})$/
-             
+
 Example Input:
+
     How  Now       Brown Cow
     Mary Had       A Little Lamb
     HumptDumpty    Sat On a Wall
- 
+
 Expected Output:
+
     Col One,Col Two,Col Three
     How,Now,Brown Cow
     Mary,Had,A Little Lamb
@@ -20,24 +28,25 @@ Expected Output:
 Here’s a reasonably full example that shows the general idea that takes a fixed-format ASCII file on the input and generates JSON on the output with validation.
  
 Example Script #2
+-----------------
  
     # Parse a fixed format input consisting of two white-space padded fixed width fields.
     Input Encoding: 'ASCII'
      
     # Define the mapping from capture groups to columns; also naming and ordering the columns.
     # Note that D is the date captured in the header line.
-    Header[D]: 'Date'
-    Header[2]: 'Type'
-    Header[1]: 'Description'
+    Header[D]: Title="Date"
+    Header[2]: Title="Type"
+    Header[1]: Title="Description"
      
     # Set the output format.
-    Output Encoding: 'UTF-8'
-    Output Format: 'JSON'
+    Output Encoding: "UTF-8"
+    Output Format: "JSON"
      
     # The first line of the file is expected to contain the date, which is captured and given the name D.
     # Regexs are enclosed between slashes (a common convention).
     Require: //DATA FILE (.*)//
-        Transform[1 -> D]: Copy
+        Copy: From=[1], To=[D]
      
     Until: //END OF DATA//
         # While will repeatedly match records that fit the 30,10 fixed width format.
@@ -50,9 +59,11 @@ Example Script #2
      
     # No further input is allowed.
     Done
-             
+
+
  
 Example Input:
+
     DATA FILE 20/Oct/2017
     Speed >30 in residential zone 013
     Speed >national speed limit   013
@@ -60,10 +71,37 @@ Example Input:
     I am a bad record
     Other bad record              015
     END OF DATA
+
 Expected output:
+
     [{"Date":"20/Oct/2017", "Type":"Speed", "Description":"Speed >30 in residential zone"},
     {"Date":"20/Oct/2017", "Type":"Speed", "Description":"Speed >national speed limit"},
     {"Date":"20/Oct/2017", "Type":"Drunk", "Description":"Driving while intoxicated"}]
+
 Expected errors:
+
     Invalid record, line 5: I am a bad record
     Invalid code, line 6: 015
+
+Syntax Design
+-------------
+The command file consists of a series of hierarchical commands that are 
+interpreted in sequence. Each command consists of an action-keyword followed
+optionally by punctuation-separated positional arguments, followed optionally by 
+comma-separated keyword arguments, led by colons. Column arguments are enclosed 
+in brackets. 
+
+    Command ::= Action [ PositionalArguments ] [ : KeywordArguments ]
+    PositionalArguments ::= Expression [ , PositionalArguments ]
+    KeywordArguments ::= Keyword [ = Expression ] [ , KeywordArguments ]
+
+e.g.
+
+    Print
+    Header[1]: Title='Reference Number'
+    Copy: From=[1], To=[D]
+
+Although arguments are syntactically optional, commands typically have mandatory
+parameters that must be supplied at the point of invocation.
+
+
