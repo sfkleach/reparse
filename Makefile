@@ -4,6 +4,7 @@ all:
 	#	clean
 	#	build - build the zip file
 	#	docs - build the user documentation
+	# 	test - run unit tests
 
 .PHONEY: clean
 clean:
@@ -15,6 +16,10 @@ build: docs
 	mkdir -p _build
 	mkdir -p _build/docs
 	cp docs/vision.html _build/docs
+
+.PHONEY: test
+test:
+	nose2
 
 .PHONEY: docs
 docs: docs/vision.html
