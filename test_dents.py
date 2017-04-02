@@ -13,6 +13,6 @@ THETA
 '''
 
 def test_dents():
-	for t in dents.Dent( tokenise.ReparseTokeniserFactory( io.StringIO( TEXT ) ) ):
+	for t in dents.Dent( tokenise.ReparseLexerFactory( io.StringIO( TEXT ) ) ):
 		print( t )
-		
+

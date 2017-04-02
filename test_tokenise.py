@@ -1,5 +1,5 @@
 import io
-from tokenise import ReparseTokeniserFactory
+from tokenise import ReparseLexerFactory
 from lexeme import  LexemeType, Lexeme
 from dents import Dent
 
@@ -11,7 +11,7 @@ def match( t, ttype_tvalue ):
 
 def test_tokenise():
 	text = 'Header[1]: "Foo"'
-	lexemes = [ *Dent( ReparseTokeniserFactory( io.StringIO( text ) ) ) ]
+	lexemes = [ *Dent( ReparseLexerFactory( io.StringIO( text ) ) ) ]
 	assert match( lexemes[0], ( LexemeType.Symbol, 'Header' ) ), "UGLY {}, {}".format( lexemes[0].lexemeType(), lexemes[0].lexemeValue() )
 	assert match( lexemes[1], ( LexemeType.Keyword, '[' )	)
 	assert match( lexemes[2], ( LexemeType.NumLiteral, '1' ) )
@@ -22,7 +22,7 @@ def test_tokenise():
 	
 def test_regex():
 	text = '//(.*/)//'
-	lexemes = [ *Dent( ReparseTokeniserFactory( io.StringIO( text ) ) ) ]
+	lexemes = [ *Dent( ReparseLexerFactory( io.StringIO( text ) ) ) ]
 	# print( lexemes[0].lexemeValue() )
 	assert match( lexemes[0], ( LexemeType.RegexLiteral, '(.*/)' ) )
 	assert len( lexemes ) == 1

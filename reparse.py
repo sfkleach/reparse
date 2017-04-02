@@ -12,7 +12,7 @@ def reparse():
 	parser.add_argument( "--input", "-i", help="Input file to process (or - for stdin), defaults to stdin", default=sys.stdin, type=argparse.FileType( 'r' ) )
 	parser.add_argument( "--output", "-o", help="Output file to generate (or - for stdout), defaults to stdout", default=sys.stdout, type=argparse.FileType( 'r' ) )
 	args = parser.parse_args()
-	program = parse.ReparseParser( tokenise.ReparseTokeniserFactory( args.script ) ).readStatements()
+	program = parse.ReparseParser( tokenise.ReparseLexerFactory( args.script ) ).readStatements()
 	env = actions.Environment()
 	env.input = args.input
 	env.output = args.output

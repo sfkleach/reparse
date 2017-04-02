@@ -1,9 +1,9 @@
-from tokeniserfactory import TokeniserFactory, MoveSet, Accept, Pushback, Erase
+from lexerfactory import LexerFactory, MoveSet, Accept, Pushback, Erase
 from lexeme import Lexeme, LexemeType
 import dents
 
-ReparseTokeniserFactory = (
-	TokeniserFactory(
+ReparseLexerFactory = (
+	LexerFactory(
 	    { 
 		    "StartLine": 
 		    	MoveSet(
