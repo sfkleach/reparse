@@ -1,5 +1,5 @@
 import re
-from tokenise import TokenType
+from lexeme import LexemeType
 from actions import SetHeader, Seq, Print, Repeat
 import dents
 
@@ -25,11 +25,11 @@ class ReparseParser:
 		if t:
 			if t.isNumLiteral():
 				try:
-					return int( t.tokenValue() )
+					return int( t.lexemeValue() )
 				except ValueError:
-					return float( t.tokenValue() )
+					return float( t.lexemeValue() )
 			else:
-				raise Exception( 'Number needed: {}'.format( t.tokenValue() ) )
+				raise Exception( 'Number needed: {}'.format( t.lexemeValue() ) )
 		else:
 			raise Exception( 'Unexpected end of file' )
 
@@ -37,9 +37,9 @@ class ReparseParser:
 		t = self._tokens.nextOptToken()
 		if t:
 			if t.isStringLiteral():
-				return t.tokenValue()
+				return t.lexemeValue()
 			else:
-				raise Exception( 'String needed: {}'.format( t.tokenValue() ) )
+				raise Exception( 'String needed: {}'.format( t.lexemeValue() ) )
 		else:
 			raise Exception( 'Unexpected end of file' )
 
@@ -47,9 +47,9 @@ class ReparseParser:
 		t = self._tokens.nextOptToken()
 		if t:
 			if t.isRegexLiteral():
-				return re.compile( t.tokenValue() + ( '\\n' if with_newline else '' ) )
+				return re.compile( t.lexemeValue() + ( '\\n' if with_newline else '' ) )
 			else:
-				raise Exception( 'String needed: {}'.format( t.tokenValue() ) )
+				raise Exception( 'String needed: {}'.format( t.lexemeValue() ) )
 		else:
 			raise Exception( 'Unexpected end of file' )
 
@@ -57,26 +57,26 @@ class ReparseParser:
 		t = self._tokens.nextOptToken()
 		if t:
 			if t.isSymbol():
-				v = t.tokenValue()
+				v = t.lexemeValue()
 				if v in PREFIX_TABLE:
 					return PREFIX_TABLE[ v ]( self )
 				else:
 					raise Exception( 'Not implemented yet: {}'.format( v ) )
 			else:
-				raise Exception( 'Not implemented yet: {}'.format( t.tokenType() ) )
+				raise Exception( 'Not implemented yet: {}'.format( t.LexemeType() ) )
 		else:
 			return None
 
 	def readHeader( self ):
-		self.mustReadToken( TokenType.Keyword, '[' )
+		self.mustReadToken( LexemeType.Keyword, '[' )
 		num = self.readNumLiteral()
-		self.mustReadToken( TokenType.Keyword, ']' )
-		self.mustReadToken( TokenType.Keyword, ':' )
+		self.mustReadToken( LexemeType.Keyword, ']' )
+		self.mustReadToken( LexemeType.Keyword, ':' )
 		title = self.readStringLiteral()
 		return SetHeader( title, num )
 
 	def readPrintRepeat( self ):
-		# self.mustReadToken( TokenType.Keyword, ':' )		
+		# self.mustReadToken( LexemeType.Keyword, ':' )		
 		regex = self.readRegexLiteral()
 		return Repeat( regex, Print() )
 

@@ -1,5 +1,5 @@
 # Converts indentation tokens into indents and outdents.
-from tokenise import TokenType, Token
+from lexeme import LexemeType, Lexeme
 
 class Dent:
 
@@ -17,7 +17,7 @@ class Dent:
 		while True:
 			token = self._token_src.nextOptToken()
 			if token and token.isIndentation():
-				v = token.tokenValue()
+				v = token.lexemeValue()
 				if v == self.previous():
 					continue
 				else:
@@ -28,13 +28,13 @@ class Dent:
 						# Record the nesting level.
 						self._previous.append( v )
 						# Return an indent.
-						return Token( TokenType.Indentation, 1 )
+						return Lexeme( LexemeType.Indentation, 1 )
 					else:
 						# It is a shallower indentation level.
 						# Keep popping the stack and pushing outdents.
 						self._previous.pop()
 						self._token_src.pushToken( token )
-						return Token( TokenType.Indentation, -1 )
+						return Lexeme( LexemeType.Indentation, -1 )
 			else:
 				return token
 
