@@ -1,0 +1,8 @@
+Reparse - Script Syntax
+=======================
+
+Comments
+--------
+Scripts use the hash (#) character to introduce end of line comments. Note that
+comments do not contribute to indentation; a line that is just an indented
+comment is discarded.

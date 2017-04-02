@@ -21,9 +21,11 @@ build: docs
 test:
 	nose2
 
+DOCS=docs/vision.html docs/syntax.html docs/commands.html
+
 .PHONEY: docs
-docs: docs/vision.html
+docs: $(DOCS)
 	true
 
-docs/vision.html:
-	asciidoctor docs/vision.txt
+docs/%.html: docs/%.txt
+	asciidoctor $<

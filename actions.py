@@ -170,6 +170,7 @@ class TransformAll( Action ):
 	def interpret( self, env ):
 		env.match = [ self._callable( v ) for v in env.match ]
 
+
 TrimCallable = str.strip
 LowerCaseCallable = str.lower
 UpperCaseCallable = str.upper

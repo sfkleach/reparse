@@ -80,6 +80,9 @@ class ReparseParser:
 		regex = self.readRegexLiteral()
 		return Repeat( regex, Print() )
 
+	def readPass( self ):
+		return Seq()
+
 	def readStatements( self ):
 		sofar = []
 		while True:
@@ -92,5 +95,6 @@ class ReparseParser:
 
 PREFIX_TABLE = {
 	'Header': ReparseParser.readHeader,
-	'Print-Repeat': ReparseParser.readPrintRepeat,
+	'Pass': ReparseParser.readPass,
+	'Print-Repeat': ReparseParser.readPrintRepeat
 }
