@@ -14,6 +14,7 @@ ReparseLexerFactory = (
 		    "Indentation":
 		    	MoveSet(
 		    		Accept( ' \t', "Indentation" ),
+		    		Erase( '#', "EndOfLineComment", lambda t: t.clearAccepted() ),
 		    		Pushback( True, lambda t: Lexeme( LexemeType.Indentation, t.collected() ) ),
 		    		Erase( None, lambda t: None )
 		    	),
@@ -26,8 +27,15 @@ ReparseLexerFactory = (
 			        Accept( lambda x: x.isnumeric() or x in '+-', "Num" ),
 			        Erase( '"', "String" ),
 			        Accept( '/', "Slash" ),
+			        Erase( '#', "EndOfLineComment" ),
 			        Erase( None, lambda t: None )
 			    ),
+			"EndOfLineComment": 
+				MoveSet(
+					Erase( '\n', "StartLine" ),
+					Erase( True, "EndOfLineComment" ),
+					Erase( None, lambda t: None )
+				),
 			"Slash":
 				MoveSet(
 					Erase( '/', "Regex0", lambda t: t.clearAccepted() ),
