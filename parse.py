@@ -1,7 +1,9 @@
 import re
 from lexeme import LexemeType
 from actions import SetHeader, Seq, Print, Repeat
+
 import dents
+import tokenise
 
 class ReparseParser:
 
@@ -10,7 +12,7 @@ class ReparseParser:
 
 	def mustReadToken( self, ttype, tvalue ):
 		t = self._tokens.nextOptToken()
-		if not t or t[0] != ttype or t[1] != tvalue:
+		if not t or t.lexemeType() != ttype or t.lexemeValue() != tvalue:
 			raise Exception( 'Expected token "{}" but got "{}"'.format( tvalue, t[1] ) )
  
 	def readToken( self ):
@@ -98,3 +100,6 @@ PREFIX_TABLE = {
 	'Pass': ReparseParser.readPass,
 	'Print-Repeat': ReparseParser.readPrintRepeat
 }
+
+def scriptParser( src ):
+	return ReparseParser( tokenise.ReparseLexerFactory( src ) )

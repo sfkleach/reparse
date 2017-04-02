@@ -76,5 +76,3 @@ ReparseLexerFactory = (
 	    reset="StartToken"
 	)
 )
-
-
