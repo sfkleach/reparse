@@ -7,7 +7,7 @@ all:
 
 .PHONEY: clean
 clean:
-	true
+	find _build -mindepth 1 -delete
 
 .PHONEY: build
 build:
