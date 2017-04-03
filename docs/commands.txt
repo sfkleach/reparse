@@ -1,6 +1,11 @@
 Reparse - List of Commands
 ==========================
 
+Done
+----
+This command checks that the end of input has been reached - otherwise it
+raises an exception.
+
 Header
 ------
 TBD

@@ -1,0 +1,10 @@
+/* Formal grammar */
+
+Command ::= Action PositionalArguments? ( ':' KeywordArguments )?
+
+PositionalArguments ::= Expression ( ',' PositionalArguments )?
+
+KeywordArguments ::= Keyword ( '=' Expression )? ( ',' KeywordArguments )?
+
+Action ::= 'Done' | 'Pass' | 'Header' | 'Print-Repeat' | 'Print'
+

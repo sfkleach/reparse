@@ -22,7 +22,7 @@ ReparseLexerFactory = (
 			    MoveSet(
 			        Erase( '\n', "StartLine" ),
 			        Erase( ' \t', "StartToken" ),
-			        Accept( '[]:', lambda t: Lexeme( LexemeType.Keyword, t.collected() ) ),
+			        Accept( '[]:=', lambda t: Lexeme( LexemeType.Keyword, t.collected() ) ),
 			        Accept( lambda x: x.isalpha(), "Symbol" ),
 			        Accept( lambda x: x.isnumeric() or x in '+-', "Num" ),
 			        Erase( '"', "String" ),

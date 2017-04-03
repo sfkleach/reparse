@@ -1,8 +1,35 @@
 Reparse - Script Syntax
 =======================
 
+Literal Strings
+---------------
+Strings are enclosed in double-quotes.
+
+Literal Regexs
+--------------
+Literal regexs are enclosed in // ... // pairs.
+
 Comments
 --------
 Scripts use the hash (#) character to introduce end of line comments. Note that
 comments do not contribute to indentation; a line that is just an indented
 comment is discarded.
+
+Indentation
+-----------
+Indentation is used to determine nesting. 
+
+Commands
+--------
+A script consists primarily of a series of commands that are executed in 
+sequence. Each command starts with an Action and then has zero or more 
+positional arguments followed by zero or more keyword arguments. 
+
+	Command ::= Action PositionalArguments? ( ':' KeywordArguments )?
+	PositionalArguments ::= Expression ( ',' PositionalArguments )?
+	KeywordArguments ::= Keyword ( '=' Expression )? ( ',' KeywordArguments )?
+	Action ::= 'Done' | 'Pass' | 'Header' | 'Print-Repeat' | 'Print'
+
+Also
+----
+   * See link:grammar.xhtml[Railroad Diagram of Grammar]

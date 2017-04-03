@@ -4,12 +4,23 @@ import re
 import io
 from collections import deque
 
+class FormatPrint:
+
+	@abstractmethod
+	def printRow( self, env ): pass
+
+	@abstractmethod
+	def printHeader( self, env ): pass
+
+	@abstractmethod
+	def printFooter( self, env ): pass
+
 def csvPrint( b, item ):
 	if '"' in item:
 		item = item.replace( '"', '""' )
 	b.write( item )
 
-class CSVPrint:
+class CSVPrint( FormatPrint ):
 
 	def printRow( self, env ):
 		b = sys.stdout
@@ -31,6 +42,29 @@ class CSVPrint:
 			b.write( '"' )
 		b.write( '\n' )
 
+	def printFooter( self, env ):
+		pass
+
+class Wrapped( FormatPrint ):
+	'''Wraps up an arbitrary format-print so that it will dynamically
+	print the header at first call but not thereafter.
+	'''
+
+	def __init__( self, printer ):
+		self._printer = printer
+
+	def printHeader( self, env ):
+		env.printer = self._printer
+		env.printer.printHeader( env )
+
+	def printRow( self, env ):
+		self.printHeader( env )
+		env.printer.printRow( env )
+
+	def printFooter( self, env ):
+		self.printHeader( env )
+		env.printer.printFooter( env )
+
 class Environment:
 
 	def __init__( self ):
@@ -38,20 +72,20 @@ class Environment:
 		self.vars = {}
 		self.column_names = []
 		self.columns = []
-		self.printer = CSVPrint()
+		self.printer = Wrapped( CSVPrint() )
 		self._peeked_lines = deque()	# Pop-front, Push-back.
 
 	def nextLine( self ):
 		if self._peeked_lines:
 			return self._peeked_lines.popleft()
 		else:
-			return sys.stdin.readline()			
+			return self.input.readline()			
 
 	def peekLine( self ):
 		if self._peeked_lines:
 			return self._peeked_lines[0]
 		else:
-			line = sys.stdin.readline()
+			line = self.input.readline()
 			self._peeked_lines.append( line )
 			return line
 
@@ -69,10 +103,15 @@ class Print( Action ):
 	def interpret( self, env ):
 		env.printer.printRow( env )
 
-class PrintHeaderLine( Action ):
+class PrintHeader( Action ):
 
 	def interpret( self, env ):
 		env.printer.printHeader( env )
+
+class PrintFooter( Action ):
+
+	def interpret( self, env ):
+		env.printer.printFooter( env )
 
 class Require( Action ):
 
@@ -139,6 +178,12 @@ class Seq( Action ):
 		for action in self._children:
 			action.interpret( env )
 
+	def __len__( self ):
+		return len( self._children )
+
+	def __getitem__( self, n ):
+		return self._children[ n ]
+
 class EndOfInput( Action ):
 
 	def interpret( self, env ):
@@ -170,11 +215,16 @@ class TransformAll( Action ):
 	def interpret( self, env ):
 		env.match = [ self._callable( v ) for v in env.match ]
 
-
 TrimCallable = str.strip
 LowerCaseCallable = str.lower
 UpperCaseCallable = str.upper
 CaseFoldCallable = str.casefold
+
+class Done( Action ):
+
+	def interpret( self, env ):
+		if env.nextLine():
+			raise Exception( 'Extra lines found when end of input required' )
 
 
 if __name__ == "__main__":
@@ -184,7 +234,7 @@ if __name__ == "__main__":
 		SetHeader( 'Bar', 2 ),
 		SetHeader( 'Gort', 1),
 		SetHeader( 'Flump', 1),
-		PrintHeaderLine(),
+		PrintHeader(),
 		Repeat( 
 			Require( 
 				re.compile( '^(.{5})(.{10})(.{20})\n$' ),
