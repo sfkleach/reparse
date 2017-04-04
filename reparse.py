@@ -17,7 +17,7 @@ def reparse():
 	env.input = args.input
 	env.output = args.output
 	program.interpret( env )
-	PrintFooter().interpret( env )
+	actions.PrintFooter().interpret( env )
 
 
 if __name__ == "__main__":

@@ -2,4 +2,5 @@
 Header[1]: Title = "Col One"
 Header[2]: Title = "Col Two"
 Header[3]: Title = "Col Three"
+Output: Format="JSON"
 Print-Repeat //^(.{5})(.{10})(.{20})$//

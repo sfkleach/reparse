@@ -31,7 +31,7 @@ Example Script #2
 -----------------
  
     # Parse a fixed format input consisting of two white-space padded fixed width fields.
-    Input Encoding: 'ASCII'
+    Input: Encoding="ASCII"
      
     # Define the mapping from capture groups to columns; also naming and ordering the columns.
     # Note that D is the date captured in the header line.
@@ -40,8 +40,7 @@ Example Script #2
     Header[1]: Title="Description"
      
     # Set the output format.
-    Output Encoding: "UTF-8"
-    Output Format: "JSON"
+    Output: Encoding="UTF-8", Format="JSON"
      
     # The first line of the file is expected to contain the date, which is captured and given the name D.
     # Regexs are enclosed between slashes (a common convention).

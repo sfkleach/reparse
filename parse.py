@@ -1,6 +1,6 @@
 import re
 from lexeme import LexemeType
-from actions import SetHeader, Seq, Print, Repeat, Done
+from actions import SetHeader, Seq, Print, Repeat, Done, SetOutputFormat
 
 import dents
 import tokenise
@@ -90,6 +90,13 @@ class ReparseParser:
 	def readDone( self ):
 		return Done()
 
+	def readOutput( self ):
+		self.mustReadToken( LexemeType.Keyword, ':' )
+		self.mustReadToken( LexemeType.Symbol, 'Format' )
+		self.mustReadToken( LexemeType.Keyword, '=' )
+		format_style = self.readStringLiteral()
+		return SetOutputFormat( format_style )
+
 	def readStatements( self ):
 		sofar = []
 		while True:
@@ -101,10 +108,11 @@ class ReparseParser:
 		return Seq( *sofar )
 
 PREFIX_TABLE = {
+	'Done': ReparseParser.readDone,
 	'Header': ReparseParser.readHeader,
+	'Output': ReparseParser.readOutput,
 	'Pass': ReparseParser.readPass,
-	'Print-Repeat': ReparseParser.readPrintRepeat,
-	'Done': ReparseParser.readDone
+	'Print-Repeat': ReparseParser.readPrintRepeat
 }
 
 def scriptParser( src ):

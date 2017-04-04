@@ -3,6 +3,7 @@ import sys
 import re
 import io
 from collections import deque
+import json
 
 class FormatPrint:
 
@@ -23,7 +24,7 @@ def csvPrint( b, item ):
 class CSVPrint( FormatPrint ):
 
 	def printRow( self, env ):
-		b = sys.stdout
+		b = env.output
 		gap = '"'
 		for c in env.columns:
 			b.write( gap )
@@ -33,7 +34,7 @@ class CSVPrint( FormatPrint ):
 		b.write( '\n' )
 
 	def printHeader( self, env ):
-		b = sys.stdout
+		b = env.output
 		gap = '"'
 		for name in env.column_names:
 			b.write( gap )
@@ -44,6 +45,29 @@ class CSVPrint( FormatPrint ):
 
 	def printFooter( self, env ):
 		pass
+
+class JSONPrint( FormatPrint ):
+
+	def __init__( self ):
+		self._gap = ''
+
+	def printHeader( self, env ):
+		b = env.output
+		b.write( '[\n' )
+
+	def printRow( self, env ):
+		b = env.output
+		b.write( self._gap )
+		self._gap = ',\n'
+		row = {}
+		names = iter( env.column_names )
+		for c in env.columns:
+			row[ names.__next__() ] = env.match[c]
+		json.dump( row, b )
+
+	def printFooter( self, env ):
+		b = env.output
+		b.write( '\n]\n' )
 
 class Wrapped( FormatPrint ):
 	'''Wraps up an arbitrary format-print so that it will dynamically
@@ -65,14 +89,23 @@ class Wrapped( FormatPrint ):
 		self.printHeader( env )
 		env.printer.printFooter( env )
 
+def choosePrinter( style ):
+	if style == 'CSV':
+		return CSVPrint()
+	elif style == 'JSON':
+		return JSONPrint()
+	else:
+		raise Exception( "Unknown style: {}".format( style) )
+
+
 class Environment:
 
-	def __init__( self ):
+	def __init__( self, style='CSV' ):
 		self.match = []
 		self.vars = {}
 		self.column_names = []
 		self.columns = []
-		self.printer = Wrapped( CSVPrint() )
+		self.printer = Wrapped( choosePrinter( style ) )
 		self._peeked_lines = deque()	# Pop-front, Push-back.
 
 	def nextLine( self ):
@@ -168,6 +201,15 @@ class SetHeader( Action ):
 	def interpret( self, env ):
 		env.column_names.append( self._name )
 		env.columns.append( self._index0 )
+
+class SetOutputFormat( Action ):
+	'''TODO: Don't allow if output has started'''
+
+	def __init__( self, style ):
+		self._style = style
+
+	def interpret( self, env ):
+		env.printer = Wrapped( choosePrinter( self._style ) )
 
 class Seq( Action ):
 
