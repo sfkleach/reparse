@@ -43,5 +43,8 @@ class Lexeme:
 	def isNumLiteral( self ):
 		return self._lexeme_type is LexemeType.NumLiteral
 
+	def toInt( self ):
+		return int( self._text )
+
 	def isIndentation( self ):
 		return self._lexeme_type is LexemeType.Indentation

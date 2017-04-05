@@ -29,6 +29,7 @@ positional arguments followed by zero or more keyword arguments.
 	PositionalArguments ::= Expression ( ',' PositionalArguments )?
 	KeywordArguments ::= Keyword ( '=' Expression )? ( ',' KeywordArguments )?
 	Action ::= 'Done' | 'Pass' | 'Header' | 'Print-Repeat' | 'Print'
+			 | 'Output'
 
 Also
 ----

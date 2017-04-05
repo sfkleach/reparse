@@ -32,6 +32,11 @@ class ConstructedLexer:
     def clearAccepted( self ):
         self._sofar.clear()
 
+    def peekOptToken( self ):
+        t = self.nextOptToken()
+        self.pushToken( t )
+        return t
+
     def nextOptToken( self ):
         if self._pushed_tokens:
             return self._pushed_tokens.pop()

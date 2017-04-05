@@ -250,12 +250,13 @@ class Transform( Action ):
 
 class TransformAll( Action ):
 
-	def __init__( self, index, callable ):
-		self._index = index
-		self._callable = callable
+	def __init__( self, *callables ):
+		self._callables = callables
 
 	def interpret( self, env ):
-		env.match = [ self._callable( v ) for v in env.match ]
+		for i in range( 0, env.match.lastindex ):
+			for c in self._callables:
+				env.match[ i ] = c( env.match[ i ] )
 
 TrimCallable = str.strip
 LowerCaseCallable = str.lower

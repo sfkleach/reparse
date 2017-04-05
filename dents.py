@@ -13,10 +13,15 @@ class Dent:
 		except:
 			return ''
 
+	def peekOptToken( self ):
+		t = self.nextOptToken()
+		self._token_src.pushToken( t )
+		return t
+
 	def nextOptToken( self ):
 		while True:
 			token = self._token_src.nextOptToken()
-			if token and token.isIndentation():
+			if token and token.isIndentation() and isinstance( token.lexemeValue(), str ) :
 				v = token.lexemeValue()
 				if v == self.previous():
 					continue

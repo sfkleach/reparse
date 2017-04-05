@@ -10,6 +10,16 @@ Header
 ------
 TBD
 
+Output
+------
+This command determines the kind of output that is generated.
+
+The keyword argument "Format" can take values "CSV" and "JSON". Other values
+will raise an error.
+e.g. 
+
+	Output: Format="JSON"
+
 Pass
 ----
 This is the 'null' command that does nothing. It has no parameters. The only
@@ -23,5 +33,25 @@ TBD
 Print-Repeat
 ------------
 TBD
+
+Transform
+---------
+The Transform command applies a series of transformations to a named column
+or all columns.
+
+Example:
+
+	# All columns.
+	Transform[*]: Trim
+
+	# Just the first column.
+	Transform[1]: Lowercase
+
+The transformations that are available are:
+
+  * Trim
+  * Uppercase
+  * Lowercase
+
 
 
