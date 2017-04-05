@@ -51,6 +51,16 @@ def test_transform_1argument():
 	assert p[0]._callables[1]( ' foo  ' ) == ' FOO  '
 	assert p[0]._callables[2]( ' fOo  ' ) == ' foo  '
 
+def test_until():
+	text = 'Until //.*//\n\tRequire //.*//\n'
+	p = readStatements( text )
+	assert isinstance( p, actions.Seq ), type( p )
+	assert isinstance( p[0], actions.Until ), type( p )
+	# assert len( p[0]._callables ) == 3
+	# assert p[0]._callables[0]( ' foo  ' ) == 'foo'
+	# assert p[0]._callables[1]( ' foo  ' ) == ' FOO  '
+	# assert p[0]._callables[2]( ' fOo  ' ) == ' foo  '
+
 
 if __name__ == "__main__":
     test_parse()

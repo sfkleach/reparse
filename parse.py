@@ -12,7 +12,9 @@ class ReparseParser:
 
 	def mustReadToken( self, ttype, tvalue ):
 		t = self._tokens.nextOptToken()
-		if not t or t.lexemeType() != ttype or t.lexemeValue() != tvalue:
+		if not t:
+			raise Exception( 'Expected token "{}" but at end of input'.format( tvalue ) )
+		if t.lexemeType() != ttype or t.lexemeValue() != tvalue:
 			raise Exception( 'Expected token "{}" but got "{}"'.format( tvalue, t[1] ) )
  
 	def tryReadToken( self, ttype, tvalue ):
@@ -28,6 +30,15 @@ class ReparseParser:
  
 	def tryReadKeyword( self, tvalue ):
 		return self.tryReadToken( LexemeType.Keyword, tvalue )
+ 
+	def tryReadIndent( self ):
+		return self.tryReadToken( LexemeType.Indentation, 1 )
+ 
+	def tryReadOutdent( self ):
+		return self.tryReadToken( LexemeType.Indentation, -1 )
+ 
+	def mustReadOutdent( self ):
+		self.mustReadToken( LexemeType.Indentation, -1 )
  
 	def readToken( self ):
 		t = self._tokens.nextOptToken()
@@ -70,18 +81,29 @@ class ReparseParser:
 			raise Exception( 'Unexpected end of file' )
 
 	def readCommand( self ):
-		t = self._tokens.nextOptToken()
+		t = self._tokens.peekOptToken()
 		if t:
 			if t.isSymbol():
 				v = t.lexemeValue()
 				if v in PREFIX_TABLE:
+					self._tokens.nextOptToken()
 					return PREFIX_TABLE[ v ]( self )
 				else:
 					raise Exception( 'Not implemented yet: {}'.format( v ) )
 			else:
-				raise Exception( 'Not implemented yet: {}'.format( t.lexemeType() ) )
+				return None
 		else:
 			return None
+
+	def readStatements( self ):
+		sofar = []
+		while True:
+			e = self.readCommand()
+			# print( 'Command', e )
+			if not e:
+				break
+			sofar.append( e )
+		return actions.Seq( *sofar )
 
 	def readHeader( self ):
 		self.mustReadToken( LexemeType.Keyword, '[' )
@@ -111,16 +133,6 @@ class ReparseParser:
 		format_style = self.readStringLiteral()
 		return actions.SetOutputFormat( format_style )
 
-	def readStatements( self ):
-		sofar = []
-		while True:
-			e = self.readCommand()
-			# print( 'Command', e )
-			if not e:
-				break
-			sofar.append( e )
-		return actions.Seq( *sofar )
-
 	def readTransform( self ):
 		self.mustReadKeyword( '[' )
 		n = self.readToken()
@@ -140,6 +152,24 @@ class ReparseParser:
 		else:
 			return actions.TransformAll( *callables )
 
+	def readUntil( self ):
+		regex = self.readRegexLiteral()
+		if self.tryReadIndent():
+			stmnts = self.readStatements()
+			self.mustReadOutdent()
+			return actions.Until( regex, stmnts )
+		else:
+			return actions.Until( regex, actions.Seq() )
+
+	def readRequire( self ):
+		regex = self.readRegexLiteral()
+		if self.tryReadIndent():
+			stmnts = self.readStatements()
+			self.mustReadOutdent()
+			return actions.Require( regex, stmnts )
+		else:
+			return actions.Require( regex, actions.Seq() )
+
 TRANSFORMS_TABLE = {
 	'Trim': actions.TrimCallable,
 	'Lowercase': str.lower,
@@ -152,7 +182,9 @@ PREFIX_TABLE = {
 	'Output': ReparseParser.readOutput,
 	'Pass': ReparseParser.readPass,
 	'Print-Repeat': ReparseParser.readPrintRepeat,
-	'Transform': ReparseParser.readTransform
+	'Require': ReparseParser.readRequire,
+	'Transform': ReparseParser.readTransform,
+	'Until': ReparseParser.readUntil
 }
 
 def scriptParser( src ):

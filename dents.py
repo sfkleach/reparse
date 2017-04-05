@@ -21,25 +21,31 @@ class Dent:
 	def nextOptToken( self ):
 		while True:
 			token = self._token_src.nextOptToken()
-			if token and token.isIndentation() and isinstance( token.lexemeValue(), str ) :
-				v = token.lexemeValue()
-				if v == self.previous():
-					continue
-				else:
-					# print( 'COMPARE', len( self.previous() ), len( v ) )
-					# print( 'Stack', self._previous )
-					if v.startswith( self.previous() ):
-						# It is a new, deeper indentation level.
-						# Record the nesting level.
-						self._previous.append( v )
-						# Return an indent.
-						return Lexeme( LexemeType.Indentation, 1 )
+			if token:
+				if token.isIndentation() and isinstance( token.lexemeValue(), str ) :
+					v = token.lexemeValue()
+					if v == self.previous():
+						continue
 					else:
-						# It is a shallower indentation level.
-						# Keep popping the stack and pushing outdents.
-						self._previous.pop()
-						self._token_src.pushToken( token )
-						return Lexeme( LexemeType.Indentation, -1 )
+						# print( 'COMPARE', len( self.previous() ), len( v ) )
+						# print( 'Stack', self._previous )
+						if v.startswith( self.previous() ):
+							# It is a new, deeper indentation level.
+							# Record the nesting level.
+							self._previous.append( v )
+							# Return an indent.
+							return Lexeme( LexemeType.Indentation, 1 )
+						else:
+							# It is a shallower indentation level.
+							# Keep popping the stack and pushing outdents.
+							self._previous.pop()
+							self._token_src.pushToken( token )
+							return Lexeme( LexemeType.Indentation, -1 )
+				else:
+					return token
+			elif self._previous:
+				self._previous.pop()
+				return Lexeme( LexemeType.Indentation, -1 )
 			else:
 				return token
 
