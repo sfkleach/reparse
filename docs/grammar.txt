@@ -1,11 +1,20 @@
-/* Formal grammar */
+/* n.b. Command also matches CommandPattern */
+Command ::= DoneCommand | PassCommand | HeaderCommand | PrintRepeatCommand
+			 | PrintCommand | RequireCommand | TransformCommand
+			 | UntilCommand
 
-Command ::= Action PositionalArguments? ( ':' KeywordArguments )?
+DoneCommand ::= 'Done'
+PassCommand ::= 'Pass'
+HeaderCommand ::= 'Header' Column ':' 'Title' '=' String
+PrintRepeatCommand ::= 'Print-Repeat' RegEx ( Indent Commands Outdent )?
+PrintCommand ::= 'Print'
+RequireCommand ::= 'Require' RegEx ( Indent Commands Outdent )?
+TransformCommand ::= 'Transform' Column ':' Filter ( ',' Filter )*
+UntilCommand ::= 'Until' RegEx ( Indent Commands Outdent )?
+
+CommandPattern ::= Action PositionalArguments? ( ':' KeywordArguments )?
 
 PositionalArguments ::= Expression ( ',' PositionalArguments )?
 
 KeywordArguments ::= Keyword ( '=' Expression )? ( ',' KeywordArguments )?
-
-Action ::= 'Done' | 'Pass' | 'Header' | 'Print-Repeat' | 'Print'
-		 | 'Transform'
 

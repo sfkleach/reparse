@@ -28,8 +28,8 @@ positional arguments followed by zero or more keyword arguments.
 	Command ::= Action PositionalArguments? ( ':' KeywordArguments )?
 	PositionalArguments ::= Expression ( ',' PositionalArguments )?
 	KeywordArguments ::= Keyword ( '=' Expression )? ( ',' KeywordArguments )?
-	Action ::= 'Done' | 'Pass' | 'Header' | 'Print-Repeat' | 'Print'
-			 | 'Output'
+	Action ::= 'Done'| 'Header' | 'Pass' | 'Print-Repeat' | 'Print'
+			 | 'Output' | 'Require' | 'Until'
 
 Also
 ----

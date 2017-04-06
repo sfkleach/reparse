@@ -34,6 +34,17 @@ Print-Repeat
 ------------
 TBD
 
+Require
+-------
+
+	Require REGEX
+		COMMANDS
+
+The Require command matches the next input line against the regex REGEX, 
+raising an error if no match is possible. Then the commands COMMANDS are
+executed with the match-groups bound.
+
+
 Transform
 ---------
 The Transform command applies a series of transformations to a named column
@@ -53,5 +64,12 @@ The transformations that are available are:
   * Uppercase
   * Lowercase
 
+Until
+-----
 
+	Until REGEX
+		COMMANDS
 
+The Until command loops matches the next input line against the regex 
+REGEX, stopping if no match is possible, otherwise executing the commands 
+COMMANDS with the match-groups bound.
