@@ -21,7 +21,7 @@ build: docs
 test:
 	nose2
 
-DOCS=docs/vision.html docs/syntax.html docs/commands.html
+DOCS=docs/vision.html docs/syntax.html docs/commands.html docs/grammar.html
 
 .PHONEY: docs
 docs: $(DOCS)

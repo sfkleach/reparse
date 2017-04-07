@@ -10,9 +10,10 @@ PrintRepeatCommand ::= 'Print-Repeat' RegEx ( Indent Commands Outdent )?
 PrintCommand ::= 'Print'
 RequireCommand ::= 'Require' RegEx ( Indent Commands Outdent )?
 TransformCommand ::= 'Transform' Column ':' Filter ( ',' Filter )*
-UntilCommand ::= 'Until' RegEx ( Indent Commands Outdent )?
+UntilCommand ::= 'Until' RegEx ( ':' 'At-End' '=' 'Break' )? ( Indent Commands Outdent )? 
 
-CommandPattern ::= Action PositionalArguments? ( ':' KeywordArguments )?
+CommandPattern ::= Action PositionalArguments? ( ':' KeywordArguments )? SubCommands?
+SubCommands ::= ( Indent Commands Outdent )? 
 
 PositionalArguments ::= Expression ( ',' PositionalArguments )?
 

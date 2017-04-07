@@ -28,7 +28,12 @@ describe a lack of action.
 
 Print
 -----
-TBD
+Syntax:
+
+	Print
+
+This command causes a record to be sent to the output. It has no parameters
+and no options.
 
 Print-Repeat
 ------------
@@ -36,6 +41,7 @@ TBD
 
 Require
 -------
+Syntax:
 
 	Require REGEX
 		COMMANDS
@@ -47,8 +53,12 @@ executed with the match-groups bound.
 
 Transform
 ---------
-The Transform command applies a series of transformations to a named column
-or all columns.
+Syntax:
+
+	Transform COLUMN: FILTER, ...
+
+The Transform command applies a series of 'filters' (i.e. transformations) to a 
+named column or all columns. 
 
 Example:
 
@@ -58,7 +68,7 @@ Example:
 	# Just the first column.
 	Transform[1]: Lowercase
 
-The transformations that are available are:
+The filters that are available are:
 
   * Trim
   * Uppercase
@@ -67,9 +77,12 @@ The transformations that are available are:
 Until
 -----
 
-	Until REGEX
+	Until REGEX [ : At-End=Break ]
 		COMMANDS
 
 The Until command loops matches the next input line against the regex 
 REGEX, stopping if no match is possible, otherwise executing the commands 
 COMMANDS with the match-groups bound.
+
+If the At-End=Break option is set then the loop will break if the end of input
+is encountered rather than a match for REGEX.

@@ -1,5 +1,5 @@
-Reparse - Script Syntax
-=======================
+Overview of Reparse's Script Language
+=====================================
 
 Literal Strings
 ---------------
@@ -31,6 +31,10 @@ positional arguments followed by zero or more keyword arguments.
 	Action ::= 'Done'| 'Header' | 'Pass' | 'Print-Repeat' | 'Print'
 			 | 'Output' | 'Require' | 'Until'
 
-Also
-----
-   * See link:grammar.xhtml[Railroad Diagram of Grammar]
+See link:commands.html[Commands] for the syntax of each command and 
+link:grammar.html[Grammar] for the formal grammar.
+
+See Also
+--------
+   * See link:diagram.xhtml[Railroad Diagram of Grammar]
+   * See link:grammar.html[EBNF Grammar]
