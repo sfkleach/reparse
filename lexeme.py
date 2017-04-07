@@ -31,16 +31,27 @@ class Lexeme:
 	def lexemeValue( self ):
 		return self._text
 
-	def isSymbol( self ):
+	def isSymbol( self, value = None ):
+		if value != None and value != self._text:
+			return False
 		return self._lexeme_type is LexemeType.Symbol
 
-	def isStringLiteral( self ):
+	def isKeyword( self, value = None ):
+		if value != None and value != self._text:
+			return False
+		return self._lexeme_type is LexemeType.Keyword
+
+	def isStringLiteral( self, value = None ):
+		if value != None and value != self._text:
+			return False
 		return self._lexeme_type is LexemeType.StringLiteral
 
 	def isRegexLiteral( self ):
 		return self._lexeme_type is LexemeType.RegexLiteral
 
-	def isNumLiteral( self ):
+	def isNumLiteral( self, value = None ):
+		if value != None and value != self._text:
+			return False		
 		return self._lexeme_type is LexemeType.NumLiteral
 
 	def toInt( self ):

@@ -1,6 +1,5 @@
 import re
 from lexeme import LexemeType
-# from actions import SetHeader, Seq, Print, Repeat, Done, SetOutputFormat, Transform
 import actions
 import dents
 import tokenise
@@ -149,17 +148,31 @@ class ReparseParser:
 					break
 		if n.isNumLiteral():
 			return actions.Transform( n.toInt(), *callables )
-		else:
+		elif n.isKeyword( value="*" ):
 			return actions.TransformAll( *callables )
+		else:
+			raise Exception( 'Not implemented yet: {} {}'.format( n.lexemeType(), n.lexemeValue() ) )
 
 	def readUntil( self ):
 		regex = self.readRegexLiteral()
+		break_at_end = False
+		if self.tryReadKeyword( ':' ):
+			key = self.readToken()
+			if key.isSymbol( value="At-End" ):
+				self.mustReadKeyword( '=' )
+				val = self.readToken()
+				if val.isSymbol( value="Break" ):
+					break_at_end = True
+				else:
+					raise Exception( 'Not implemented yet' )
+			else:
+				raise Exception( 'Until: unrecognised key: {}'.format( key.lexemeValue() ) )
 		if self.tryReadIndent():
 			stmnts = self.readStatements()
 			self.mustReadOutdent()
-			return actions.Until( regex, stmnts )
+			return actions.Until( regex, stmnts, break_at_end=break_at_end )
 		else:
-			return actions.Until( regex, actions.Seq() )
+			return actions.Until( regex, actions.Seq(), break_at_end=break_at_end )
 
 	def readRequire( self ):
 		regex = self.readRegexLiteral()
@@ -169,6 +182,9 @@ class ReparseParser:
 			return actions.Require( regex, stmnts )
 		else:
 			return actions.Require( regex, actions.Seq() )
+
+	def readPrint( self ):
+		return actions.Print()
 
 TRANSFORMS_TABLE = {
 	'Trim': actions.TrimCallable,
@@ -181,6 +197,7 @@ PREFIX_TABLE = {
 	'Header': ReparseParser.readHeader,
 	'Output': ReparseParser.readOutput,
 	'Pass': ReparseParser.readPass,
+	'Print': ReparseParser.readPrint,
 	'Print-Repeat': ReparseParser.readPrintRepeat,
 	'Require': ReparseParser.readRequire,
 	'Transform': ReparseParser.readTransform,

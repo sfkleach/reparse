@@ -177,17 +177,22 @@ class Repeat( Action ):
 
 class Until( Action ):
 
-	def __init__( self, regex, body ):
+	def __init__( self, regex, body, break_at_end = False ):
 		self._regex = regex
 		self._body = body
+		self._break_at_end = break_at_end
 
 	def interpret( self, env ):
 		while True:
 			line = env.peekLine()
 			if not line:
-				break
+				if self._break_at_end:
+					break
+				else:
+					raise Exception( 'Unexpected end of input' )
 			m = self._regex.fullmatch( line )
 			if m:
+				env.nextLine()
 				break
 			else:
 				self._body.interpret( env )

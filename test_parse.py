@@ -18,6 +18,12 @@ def test_done():
 	assert isinstance( p, actions.Seq ), type( p )
 	assert isinstance( p[0], actions.Done ), type( p )
 
+def test_print():
+	text = 'Print\n'
+	p = readStatements( text )
+	assert isinstance( p, actions.Seq ), type( p )
+	assert isinstance( p[0], actions.Print ), type( p )
+
 def test_dummy_transform():
 	text = 'Transform[1]\n'
 	p = readStatements( text )
