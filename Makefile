@@ -6,11 +6,6 @@ all:
 	#	docs - build the user documentation
 	# 	test - run unit tests
 
-.PHONEY: clean
-clean:
-	find _build -mindepth 1 -delete
-	rm docs/vision.html
-
 .PHONEY: build
 build: docs
 	mkdir -p _build
@@ -28,4 +23,10 @@ docs: $(DOCS)
 	true
 
 docs/%.html: docs/%.txt
-	asciidoctor $<
+	asciidoctor -a stylesheet=readthedocs.css $<
+
+.PHONEY: clean
+clean:
+	find _build -mindepth 1 -delete
+	rm -f $(DOCS)
+
