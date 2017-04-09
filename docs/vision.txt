@@ -58,7 +58,7 @@ Example Script #2
             Transform[*]: Trim
             # The second capture group is expected to be 013 or 014 and has to be mapped.
             # A series of regex substitutions are applied.
-            Transform[2]: Apply-Table="Offence"
+            Transform[2]: Use-Table="Offence"
      
     # No further input is allowed.
     Done

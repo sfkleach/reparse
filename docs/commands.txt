@@ -6,6 +6,10 @@ Done
 This command checks that the end of input has been reached - otherwise it
 raises an exception.
 
+Entry
+-----
+See Table.
+
 Header
 ------
 TBD
@@ -50,6 +54,24 @@ The Require command matches the next input line against the regex REGEX,
 raising an error if no match is possible. Then the commands COMMANDS are
 executed with the match-groups bound.
 
+Table and Entry
+---------------
+Syntax:
+
+	Table: Name=NAME [, Error=MESSAGE]
+    Entry: Match=REGEX, Value=STRING
+
+The Table command sets up a new table with the given name that can be
+used in a Transform with the Use-Table action. Entries are added using the
+Entry command, which adds a match-rule to the current Table. Entries are
+ordered and are used in sequence.
+
+A Table may also specify what should happen when a value is supplied that
+does not match any entry. If the optional Error keyword is present, it means
+that the lookup should fail with that error message. If it is absent then
+the original value should be used.
+
+(Error handling and validation will be improved in the next cycle.)
 
 Transform
 ---------
@@ -73,6 +95,7 @@ The filters that are available are:
   * Trim
   * Uppercase
   * Lowercase
+  * Use-Table
 
 Until
 -----

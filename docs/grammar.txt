@@ -1,21 +1,24 @@
 /* n.b. Command also matches CommandPattern */
-Command ::= DoneCommand | PassCommand | HeaderCommand | PrintRepeatCommand
-			 | PrintCommand | RequireCommand | TransformCommand
-			 | UntilCommand
+Command ::= DoneCommand | EntryCommand | HeaderCommand | PassCommand 
+		  | PrintRepeatCommand | PrintCommand | RequireCommand 
+		  | TableCommand | TransformCommand | UntilCommand
 
 DoneCommand ::= 'Done'
-PassCommand ::= 'Pass'
+EntryCommand ::= 'Entry' ':' EntryCommandArg ( ',' EntryCommandArg )*
+EntryCommandArg ::= 'Match' '=' Regex
+EntryCommandArg ::= 'Value' '=' String
 HeaderCommand ::= 'Header' Column ':' 'Title' '=' String
+PassCommand ::= 'Pass'
 PrintRepeatCommand ::= 'Print-Repeat' RegEx ( Indent Commands Outdent )?
 PrintCommand ::= 'Print'
 RequireCommand ::= 'Require' RegEx ( Indent Commands Outdent )?
+TableCommand ::= 'Table' ':' TableCommandArg ( ',' TableCommandArg )*
+TableCommandArg ::= 'Name' '=' String
+TableCommandArg ::= Error' '=' String
 TransformCommand ::= 'Transform' Column ':' Filter ( ',' Filter )*
 UntilCommand ::= 'Until' RegEx ( ':' 'At-End' '=' 'Break' )? ( Indent Commands Outdent )? 
 
 CommandPattern ::= Action PositionalArguments? ( ':' KeywordArguments )? SubCommands?
 SubCommands ::= ( Indent Commands Outdent )? 
-
 PositionalArguments ::= Expression ( ',' PositionalArguments )?
-
 KeywordArguments ::= Keyword ( '=' Expression )? ( ',' KeywordArguments )?
-
