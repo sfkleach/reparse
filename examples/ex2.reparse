@@ -3,6 +3,6 @@ Header[1]: Title = "Col One"
 Header[2]: Title = "Col Two"
 Output: Format="JSON"
 Until //END//
-	Require //[A-Z]*([^ ]+) ([^ ]+)//
+	Require //([^ ]+) ([^ ]+)//
 		Print
 Done

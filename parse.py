@@ -127,7 +127,12 @@ class ReparseParser:
 	def readPrintRepeat( self ):
 		# self.mustReadToken( LexemeType.Keyword, ':' )		
 		regex = self.readRegexLiteral()
-		return actions.Repeat( regex, actions.Print() )
+		if self.tryReadIndent():
+			stmnts = self.readStatements()
+			self.mustReadOutdent()
+			return actions.Repeat( regex, actions.Seq( stmnts, actions.Print() ) )
+		else:
+			return actions.Repeat( regex, actions.Print() )
 
 	def readPass( self ):
 		return actions.Seq()
@@ -147,9 +152,11 @@ class ReparseParser:
 		n = self.readToken()
 		self.mustReadKeyword( ']' )
 		callables = []
+		values = []
 		if self.tryReadKeyword( ':' ):
 			while True:
 				key = self.readToken()
+				values.append( self.readStringLiteral() if self.tryReadKeyword( '=' ) else None )
 				try:
 					callables.append( TRANSFORMS_TABLE[ key.lexemeValue() ] )
 				except KeyError:
@@ -157,9 +164,9 @@ class ReparseParser:
 				if not self.tryReadKeyword( ',' ):
 					break
 		if n.isNumLiteral():
-			return actions.Transform( n.toInt(), *callables )
+			return actions.Transform( n.toInt(), callables, values )
 		elif n.isKeyword( value="*" ):
-			return actions.TransformAll( *callables )
+			return actions.TransformAll( callables, values )
 		else:
 			raise Exception( 'Not implemented yet: {} {}'.format( n.lexemeType(), n.lexemeValue() ) )
 
@@ -226,7 +233,7 @@ class ReparseParser:
 			key = self.readSymbol()
 			self.mustReadKeyword( '=' )
 			if key == "Match":
-				match = self.readRegexLiteral()
+				match = self.readRegexLiteral( with_newline=False )
 			elif key == "Value":
 				value = self.readStringLiteral()
 			else:
@@ -241,8 +248,9 @@ class ReparseParser:
 
 TRANSFORMS_TABLE = {
 	'Trim': actions.TrimCallable,
-	'Lowercase': str.lower,
-	'Uppercase': str.upper
+	'Lowercase': actions.LowerCaseCallable,
+	'Uppercase': actions.UpperCaseCallable,
+	'Use-Table': actions.UseTableCallable
 }
 
 PREFIX_TABLE = {

@@ -160,7 +160,7 @@ class Require( Action ):
 			raise StopIteration
 		m = self._regex.fullmatch( line )
 		if m:
-			env.match = m.groups()
+			env.match = [ *m.groups() ]
 			self._body.interpret( env )
 		else:
 			raise Exception( 'Invalid line', line )
@@ -245,30 +245,58 @@ class TrimAll( Action ):
 	def interpret( self, env ):
 		env.match = [ v.strip() for v in env.match ]
 
-class Transform( Action ):
 
-	def __init__( self, index, *callables ):
-		self._index = index
+class TransformMixin( Action ):
+
+	def __init__( self, callables, values ):
 		self._callables = callables
+		self._values = values
+
+	def update( self, env, index ):
+		c_iter = iter( self._callables )
+		v_iter = iter( self._values )
+		try:
+			while True:
+				c = c_iter.__next__()
+				v = v_iter.__next__()
+				r = c( env.match[ index ], option=v, env=env )
+				env.match[ index ] = r
+		except StopIteration:
+			pass	
+
+class Transform( TransformMixin ):
+
+	def __init__( self, index, callables, values ):
+		super().__init__( callables, values )
+		self._index = index
 
 	def interpret( self, env ):
-		for c in self._callables:
-			env.match[ self._index ] = c( env.match[ self._index ] )
+		self.update( env, self._index - 1 )
 
-class TransformAll( Action ):
+class TransformAll( TransformMixin ):
 
-	def __init__( self, *callables ):
+	def __init__( self, callables, values ):
 		self._callables = callables
+		self._values = values
 
 	def interpret( self, env ):
 		for i in range( 0, env.match.lastindex ):
-			for c in self._callables:
-				env.match[ i ] = c( env.match[ i ] )
+			self.update( env, i )
 
-TrimCallable = str.strip
-LowerCaseCallable = str.lower
-UpperCaseCallable = str.upper
-CaseFoldCallable = str.casefold
+def TrimCallable( value, option=None, env=None ):
+	return value.strip()
+
+def LowerCaseCallable( value, option=None, env=None ):
+	return value.lower()
+
+def UpperCaseCallable( value, option=None, env=None ):
+	return value.upper()
+
+def CaseFoldCallable( value, option=None, env=None ):
+	return value.casefold()
+
+def UseTableCallable( value, option=None, env=None ):
+	return env.tables[ option ]( value )
 
 class Done( Action ):
 
@@ -286,6 +314,7 @@ class Table( Action ):
 		lookup = LookupFilter( name=self._name, error=self._error )
 		env.tables[ self._name ] = lookup
 		env._lookup = lookup
+
 
 class Entry( Action ):
 
@@ -328,8 +357,6 @@ class LookupFilter:
 			raise Exception( self._error )
 		else:
 			return key
-
-
 
 if __name__ == "__main__":
 	import re

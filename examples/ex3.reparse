@@ -1,0 +1,14 @@
+# This is a nice simple example.
+
+Header[1]: Title = "Col One"
+Header[2]: Title = "Col Two"
+
+Table: Name="One"
+Entry: Match=//Left//, Value="1"
+Entry: Match=//Right//, Value="2"
+
+Output: Format="JSON"
+
+
+Print-Repeat //([^ ]+) ([^ ]+)//
+	Transform[1]: Use-Table="One"
