@@ -315,7 +315,6 @@ class Table( Action ):
 		env.tables[ self._name ] = lookup
 		env._lookup = lookup
 
-
 class Entry( Action ):
 
 	def __init__( self, match, value ):
@@ -324,7 +323,7 @@ class Entry( Action ):
 
 	def interpret( self, env ):
 		if env._lookup:
-			env._lookup._rules.append( Rule( self._match, self._value ) )
+			env._lookup.add( self._match, self._value )
 		else:
 			raise Exception( 'No Table definition encountered yet' )
 
@@ -345,6 +344,9 @@ class LookupFilter:
 		self._name = name
 		self._error = error
 		self._rules = []
+
+	def add( self, match, value ):
+		self._rules.append( Rule( match, value ) )
 
 	def __call__( self, key ):
 		for r in self._rules:

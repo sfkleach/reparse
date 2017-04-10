@@ -82,6 +82,15 @@ def test_entry():
 	assert isinstance( p[0], actions.Entry ), type( p )
 	assert p[0]._value == '999'
 
+def test_use_table():
+	text = 'Transform[1]: Use-Table="MyTable"\n'
+	p = readStatements( text )
+	assert isinstance( p, actions.Seq ), type( p )
+	assert isinstance( p[0], actions.Transform ), type( p )
+	assert len( p[0]._callables ) == 1
+	assert len( p[0]._values ) == 1
+	assert p[0]._values[0] == "MyTable"
+	assert isinstance( p[0]._callables[0], type( actions.UseTableCallable ) )
 
 if __name__ == "__main__":
     test_parse()

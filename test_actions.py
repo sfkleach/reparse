@@ -31,3 +31,9 @@ class test_Entry():
 
 	def test_fail( self ):
 		assert 'pqr' == self._lookup( 'pqr' )
+
+def test_UseTableCallable():
+	env = actions.Environment()
+	env.tables[ "MyTable" ] = actions.LookupFilter( name="T", error=None )
+	env.tables[ "MyTable" ].add( re.compile( 'abc' ), 'xyz' )
+	assert 'xyz' == actions.UseTableCallable( 'abc', option="MyTable", env=env )
