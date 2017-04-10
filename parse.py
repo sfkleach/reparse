@@ -46,6 +46,16 @@ class ReparseParser:
 		else:
 			raise Exception( 'Unexpected end of file' )
 
+	def readSymbol( self ):
+		t = self._tokens.nextOptToken()
+		if t:
+			if t.isSymbol():
+				return t.lexemeValue()
+			else:
+				raise Exception( 'Keyword needed: {}'.format( t.lexemeValue() ) )
+		else:
+			raise Exception( 'Unexpected end of file' )
+
 	def readNumLiteral( self ):
 		t = self._tokens.nextOptToken()
 		if t:
@@ -186,6 +196,49 @@ class ReparseParser:
 	def readPrint( self ):
 		return actions.Print()
 
+	def readTable( self ):
+		'''Table: Name=NAME, Error=MESSAGE'''
+		regex = self.mustReadKeyword( ':' )
+		name = None
+		error = None
+		while True:
+			key = self.readSymbol()
+			self.mustReadKeyword( '=' )
+			val = self.readStringLiteral()
+			if key == "Name":
+				name = val
+			elif key == "Error":
+				error = val
+			else:
+				raise Exception( 'Invalid key for Table: {}'.format( key ) )
+			if not self.tryReadKeyword( "," ):
+				break
+		if not name:
+			raise Exception( 'Table missing name' )
+		return actions.Table( name, error=error )
+
+	def readEntry( self ):
+		'''Entry: Match=REGEX, Value=STRING'''
+		regex = self.mustReadKeyword( ':' )
+		match = None
+		value = None
+		while True:
+			key = self.readSymbol()
+			self.mustReadKeyword( '=' )
+			if key == "Match":
+				match = self.readRegexLiteral()
+			elif key == "Value":
+				value = self.readStringLiteral()
+			else:
+				raise Exception( 'Entry - invalid keyword argument: {}'.format( key ) )
+			if not self.tryReadKeyword( "," ):
+				break
+		if not match:
+			raise Exception( 'Entry missing keyword Match' )
+		if not value:
+			raise Exception( 'Entry missing keyword Value' )
+		return actions.Entry( match, value )
+
 TRANSFORMS_TABLE = {
 	'Trim': actions.TrimCallable,
 	'Lowercase': str.lower,
@@ -194,12 +247,14 @@ TRANSFORMS_TABLE = {
 
 PREFIX_TABLE = {
 	'Done': ReparseParser.readDone,
+	'Entry': ReparseParser.readEntry,
 	'Header': ReparseParser.readHeader,
 	'Output': ReparseParser.readOutput,
 	'Pass': ReparseParser.readPass,
 	'Print': ReparseParser.readPrint,
 	'Print-Repeat': ReparseParser.readPrintRepeat,
 	'Require': ReparseParser.readRequire,
+	'Table': ReparseParser.readTable,
 	'Transform': ReparseParser.readTransform,
 	'Until': ReparseParser.readUntil
 }

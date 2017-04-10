@@ -106,7 +106,9 @@ class Environment:
 		self.column_names = []
 		self.columns = []
 		self.printer = Wrapped( choosePrinter( style ) )
+		self.tables = {}
 		self._peeked_lines = deque()	# Pop-front, Push-back.
+		self._lookup = None
 
 	def nextLine( self ):
 		if self._peeked_lines:
@@ -273,6 +275,60 @@ class Done( Action ):
 	def interpret( self, env ):
 		if env.nextLine():
 			raise Exception( 'Extra lines found when end of input required' )
+
+class Table( Action ):
+
+	def __init__( self, name, error=None ):
+		self._name = name
+		self._error = error
+
+	def interpret( self, env ):
+		lookup = LookupFilter( name=self._name, error=self._error )
+		env.tables[ self._name ] = lookup
+		env._lookup = lookup
+
+class Entry( Action ):
+
+	def __init__( self, match, value ):
+		self._match = match
+		self._value = value
+
+	def interpret( self, env ):
+		if env._lookup:
+			env._lookup._rules.append( Rule( self._match, self._value ) )
+		else:
+			raise Exception( 'No Table definition encountered yet' )
+
+class Rule:
+	
+	def __init__( self, match, value ):
+		self._match = match
+		self._value = value
+
+	def matches( self, key ):
+		raise Exception( 'To be implemented' )
+
+
+class LookupFilter:
+	'''A callable filter for use with Transform'''
+
+	def __init__( self, name='', error=None ):
+		self._name = name
+		self._error = error
+		self._rules = []
+
+	def __call__( self, key ):
+		for r in self._rules:
+			if r._match.fullmatch( key ):
+				return r._value
+		return self.fail( key )
+
+	def fail( self, key ):
+		if self._error:
+			raise Exception( self._error )
+		else:
+			return key
+
 
 
 if __name__ == "__main__":

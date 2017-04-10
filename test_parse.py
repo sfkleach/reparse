@@ -67,6 +67,21 @@ def test_until():
 	# assert p[0]._callables[1]( ' foo  ' ) == ' FOO  '
 	# assert p[0]._callables[2]( ' fOo  ' ) == ' foo  '
 
+def test_table():
+	text = 'Table: Name="MyTable"\n'
+	p = readStatements( text )
+	assert isinstance( p, actions.Seq ), type( p )
+	assert isinstance( p[0], actions.Table ), type( p )
+	assert p[0]._name == "MyTable"
+	assert p[0]._error is None
+
+def test_entry():
+	text = 'Entry: Match=//.{3}//, Value="999"\n'
+	p = readStatements( text )
+	assert isinstance( p, actions.Seq ), type( p )
+	assert isinstance( p[0], actions.Entry ), type( p )
+	assert p[0]._value == '999'
+
 
 if __name__ == "__main__":
     test_parse()

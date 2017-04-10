@@ -95,7 +95,7 @@ The filters that are available are:
   * Trim
   * Uppercase
   * Lowercase
-  * Use-Table
+  * Use-Table=NAME, which applies the named table.
 
 Until
 -----
