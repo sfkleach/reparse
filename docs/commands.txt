@@ -1,6 +1,14 @@
 Reparse - List of Commands
 ==========================
 
+Copy
+----
+This command copies from one column to another. Typically the target column
+will be a named column. Named columns persist until overwritten by another
+copy and can be used to capture meta-data.
+
+	Copy: From=[1], To=[Date]
+
 Done
 ----
 This command checks that the end of input has been reached - otherwise it

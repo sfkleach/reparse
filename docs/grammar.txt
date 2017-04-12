@@ -1,8 +1,10 @@
 /* n.b. Command also matches CommandPattern */
-Command ::= DoneCommand | EntryCommand | HeaderCommand | PassCommand 
-		  | PrintRepeatCommand | PrintCommand | RequireCommand 
+Command ::= CopyCommand | DoneCommand | EntryCommand | HeaderCommand 
+          | PassCommand | PrintRepeatCommand | PrintCommand | RequireCommand 
 		  | TableCommand | TransformCommand | UntilCommand
 
+CopyCommand ::= 'Copy' ':' CopyCommandArg ( ',' CopyCommandArg )*
+CopyCommandArg ::= ( 'From' | 'To' ) =' String
 DoneCommand ::= 'Done'
 EntryCommand ::= 'Entry' ':' EntryCommandArg ( ',' EntryCommandArg )*
 EntryCommandArg ::= 'Match' '=' Regex

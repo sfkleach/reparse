@@ -29,8 +29,8 @@ arguments can be given in any order.
 	Command ::= Action PositionalArguments? ( ':' KeywordArguments )?
 	PositionalArguments ::= Expression ( ',' PositionalArguments )?
 	KeywordArguments ::= Keyword ( '=' Expression )? ( ',' KeywordArguments )?
-	Action ::= 'Done'| 'Entry' | Header' | 'Pass' | 'Print-Repeat' | 'Print'
-			 | 'Output' | 'Require' | 'Table' | Until'
+	Action ::= 'Copy' | Done'| 'Entry' | Header' | 'Pass' | 'Print-Repeat' 
+			 | 'Print' | 'Output' | 'Require' | 'Table' | Until'
 
 See link:commands.html[Commands] for the syntax of each command and 
 link:grammar.html[Grammar] for the formal grammar.
