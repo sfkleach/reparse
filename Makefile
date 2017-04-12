@@ -5,6 +5,7 @@ all:
 	#	build - build the zip file
 	#	docs - build the user documentation
 	# 	test - run unit tests
+	#	ubuntu-sdk - install the SDK on linux, excludes IDE tools.
 
 .PHONEY: build
 build: docs
@@ -29,4 +30,10 @@ docs/%.html: docs/%.txt
 clean:
 	find _build -mindepth 1 -delete
 	rm -f $(DOCS)
+
+# Will require admin password.
+.PHONEY: ubuntu-sdk
+ubuntu-sdk:
+	sudo apt-get install -y python3 rubygems
+	gem install asciidoctor
 
