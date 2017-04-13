@@ -4,7 +4,7 @@ all:
 	#	clean
 	#	build - build the zip file
 	#	docs - build the user documentation
-	# 	test - run unit tests
+	# 	check - run unit tests
 	#	ubuntu-sdk - install the SDK on linux, excludes IDE tools.
 
 .PHONEY: build
@@ -13,8 +13,8 @@ build: docs
 	mkdir -p _build/docs
 	cp docs/vision.html _build/docs
 
-.PHONEY: test
-test:
+.PHONEY: check
+check:
 	nose2
 
 DOCS=docs/vision.html docs/syntax.html docs/commands.html docs/grammar.html
