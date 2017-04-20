@@ -123,7 +123,6 @@ class ReparseParser:
 		return actions.SetHeader( title, num )
 
 	def readPrintRepeat( self ):
-		# self.mustReadToken( LexemeType.Keyword, ':' )		
 		regex = self.readRegexLiteral()
 		if self.tryReadIndent():
 			stmnts = self.readStatements()
