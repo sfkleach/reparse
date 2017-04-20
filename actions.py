@@ -29,7 +29,7 @@ class CSVPrint( FormatPrint ):
 		for c in env.columns:
 			b.write( gap )
 			gap = ',"'
-			csvPrint( b, env.match[c] )
+			csvPrint( b, env[c] )
 			b.write( '"' )
 		b.write( '\n' )
 
@@ -62,7 +62,7 @@ class JSONPrint( FormatPrint ):
 		row = {}
 		names = iter( env.column_names )
 		for c in env.columns:
-			row[ names.__next__() ] = env.match[c]
+			row[ names.__next__() ] = env[c]
 		json.dump( row, b )
 
 	def printFooter( self, env ):
@@ -102,6 +102,7 @@ class Environment:
 
 	def __init__( self, style='CSV' ):
 		self.match = []
+		self.attributes = {}
 		self.vars = {}
 		self.column_names = []
 		self.columns = []
@@ -109,6 +110,21 @@ class Environment:
 		self.tables = {}
 		self._peeked_lines = deque()	# Pop-front, Push-back.
 		self._lookup = None
+
+	def fixMatch( self, *list ):
+		self.match = list
+
+	def __getitem__( self, n ):
+		try:
+			return self.match[ n ]
+		except TypeError:
+			return self.attributes[ n ]
+
+	def __setitem__( self, n, v ):
+		try:
+			self.match[ n ] = v
+		except TypeError:
+			self.attributes[ n ] = v
 
 	def nextLine( self ):
 		if self._peeked_lines:
@@ -132,6 +148,16 @@ class Action:
 	@abstractmethod
 	def interpret( self, env ):
 		pass
+
+class Copy( Action ):
+
+	def __init__( self, frm, to ):
+		self._from = frm
+		self._to = to
+
+	def interpret( self, env ):
+		env[ self._to ] = env[ self._from ]
+
 
 class Print( Action ):
 
@@ -160,7 +186,7 @@ class Require( Action ):
 			raise StopIteration
 		m = self._regex.fullmatch( line )
 		if m:
-			env.match = [ *m.groups() ]
+			env.fixMatch( m.group(0), *m.groups() )
 			self._body.interpret( env )
 		else:
 			raise Exception( 'Invalid line', line )
@@ -202,7 +228,7 @@ class Until( Action ):
 class SetHeader( Action ):
 
 	def __init__( self, name, index1 ):
-		self._index0 = index1 - 1
+		self._index0 = index1
 		self._name = name
 
 	def interpret( self, env ):
@@ -243,7 +269,9 @@ class EndOfInput( Action ):
 class TrimAll( Action ):
 
 	def interpret( self, env ):
-		env.match = [ v.strip() for v in env.match ]
+		env.fixMatch( i.strip() for i in env.match ) 
+		for ( k, v ) in env.attributes.items():
+			env.attributes[ k ] = v.strip()
 
 
 class TransformMixin( Action ):
@@ -259,8 +287,7 @@ class TransformMixin( Action ):
 			while True:
 				c = c_iter.__next__()
 				v = v_iter.__next__()
-				r = c( env.match[ index ], option=v, env=env )
-				env.match[ index ] = r
+				env[ index ] = c( env[ index ], option=v, env=env )
 		except StopIteration:
 			pass	
 
@@ -280,8 +307,10 @@ class TransformAll( TransformMixin ):
 		self._values = values
 
 	def interpret( self, env ):
-		for i in range( 0, env.match.lastindex ):
+		for i in range( 1, env.match.lastindex ):
 			self.update( env, i )
+		for ( k, v ) in env.attributes.items():
+			self.update( env, k )
 
 def TrimCallable( value, option=None, env=None ):
 	return value.strip()

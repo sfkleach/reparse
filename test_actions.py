@@ -37,3 +37,11 @@ def test_UseTableCallable():
 	env.tables[ "MyTable" ] = actions.LookupFilter( name="T", error=None )
 	env.tables[ "MyTable" ].add( re.compile( 'abc' ), 'xyz' )
 	assert 'xyz' == actions.UseTableCallable( 'abc', option="MyTable", env=env )
+
+def test_Copy():
+	env = actions.Environment()
+	env.match = [ 'xyz' ]
+	actions.Copy( 0, 'D' ).interpret( env )
+	assert env.attributes;
+	assert 'D' in env.attributes
+	assert env.attributes[ 'D' ] == 'xyz'
