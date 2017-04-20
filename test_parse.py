@@ -92,5 +92,11 @@ def test_use_table():
 	assert p[0]._values[0] == "MyTable"
 	assert isinstance( p[0]._callables[0], type( actions.UseTableCallable ) )
 
+def test_copy():
+	text = 'Copy: From=[1], To=[D]\n'
+	p = readStatements( text )
+	assert isinstance( p, actions.Seq ), type( p )
+	assert isinstance( p[0], actions.Copy ), type( p )	
+
 if __name__ == "__main__":
     test_parse()

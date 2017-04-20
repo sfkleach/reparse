@@ -226,7 +226,7 @@ class ReparseParser:
 
 	def readEntry( self ):
 		'''Entry: Match=REGEX, Value=STRING'''
-		regex = self.mustReadKeyword( ':' )
+		self.mustReadKeyword( ':' )
 		match = None
 		value = None
 		while True:
@@ -246,6 +246,37 @@ class ReparseParser:
 			raise Exception( 'Entry missing keyword Value' )
 		return actions.Entry( match, value )
 
+	def readColumn( self ):
+		self.mustReadKeyword( '[' )
+		t = self._tokens.nextOptToken()
+		self.mustReadKeyword( ']' )
+		if t.isNumLiteral():
+			return t.numValue()
+		else:
+			return t.lexemeValue()
+
+	def readCopy( self ):
+		'''Copy: From=COLUMN, Value=COLUMN'''
+		self.mustReadKeyword( ':' )
+		options = dict( From=None, To=None )
+		while True:
+			key = self.readSymbol()
+			self.mustReadKeyword( '=' )
+			if key == "From":
+				options[ 'From' ] = self.readColumn()
+			elif key == "To":
+				options[ 'To' ] = self.readColumn()
+			else:
+				raise Exception( 'Entry - invalid keyword argument: {}'.format( key ) )
+			if not self.tryReadKeyword( "," ):
+				break
+		for ( k, v ) in options.items():
+			if v == None:
+				raise Exception( 'Entry missing keyword {}'.format( k ) )
+		return actions.Copy( options[ 'From' ], options[ 'To' ] )
+
+
+
 TRANSFORMS_TABLE = {
 	'Trim': actions.TrimCallable,
 	'Lowercase': actions.LowerCaseCallable,
@@ -254,6 +285,7 @@ TRANSFORMS_TABLE = {
 }
 
 PREFIX_TABLE = {
+	'Copy': ReparseParser.readCopy,
 	'Done': ReparseParser.readDone,
 	'Entry': ReparseParser.readEntry,
 	'Header': ReparseParser.readHeader,
