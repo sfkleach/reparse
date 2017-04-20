@@ -54,6 +54,9 @@ class Lexeme:
 			return False		
 		return self._lexeme_type is LexemeType.NumLiteral
 
+	def numValue( self ):
+		return int( self._text )
+
 	def toInt( self ):
 		return int( self._text )
 
