@@ -112,7 +112,7 @@ class Environment:
 		self._lookup = None
 
 	def fixMatch( self, *list ):
-		self.match = list
+		self.match[:] = list
 
 	def __getitem__( self, n ):
 		try:
@@ -149,6 +149,15 @@ class Action:
 	def interpret( self, env ):
 		pass
 
+	def children( self ):
+		yield from ()
+
+	def show( self, level = 1 ):
+		print( '---|' * level, end='' )
+		print( type( self ).__name__ )
+		for child in self.children():
+			child.show( level = level + 1 )
+
 class Copy( Action ):
 
 	def __init__( self, frm, to ):
@@ -157,7 +166,6 @@ class Copy( Action ):
 
 	def interpret( self, env ):
 		env[ self._to ] = env[ self._from ]
-
 
 class Print( Action ):
 
@@ -189,7 +197,10 @@ class Require( Action ):
 			env.fixMatch( m.group(0), *m.groups() )
 			self._body.interpret( env )
 		else:
-			raise Exception( 'Invalid line', line )
+			raise Exception( 'Invalid line', line, self._regex )
+
+	def children( self ):
+		yield self._body
 
 class Repeat( Action ):
 
@@ -202,6 +213,9 @@ class Repeat( Action ):
 			if not line:
 				break
 			self._body.interpret( env )
+
+	def children( self ):
+		yield self._body
 
 class Until( Action ):
 
@@ -224,6 +238,9 @@ class Until( Action ):
 				break
 			else:
 				self._body.interpret( env )
+
+	def children( self ):
+		yield self._body
 
 class SetHeader( Action ):
 
@@ -259,6 +276,10 @@ class Seq( Action ):
 	def __getitem__( self, n ):
 		return self._children[ n ]
 
+	def children( self ):
+		for i in self._children:
+			yield i
+
 class EndOfInput( Action ):
 
 	def interpret( self, env ):
@@ -269,7 +290,7 @@ class EndOfInput( Action ):
 class TrimAll( Action ):
 
 	def interpret( self, env ):
-		env.fixMatch( i.strip() for i in env.match ) 
+		env.fixMatch( env.match[ i ].strip() for i in range( 1, len( env.match ) ) )
 		for ( k, v ) in env.attributes.items():
 			env.attributes[ k ] = v.strip()
 
@@ -298,7 +319,7 @@ class Transform( TransformMixin ):
 		self._index = index
 
 	def interpret( self, env ):
-		self.update( env, self._index - 1 )
+		self.update( env, self._index )
 
 class TransformAll( TransformMixin ):
 
@@ -307,7 +328,7 @@ class TransformAll( TransformMixin ):
 		self._values = values
 
 	def interpret( self, env ):
-		for i in range( 1, env.match.lastindex ):
+		for i in range( 1, len( env.match ) ):
 			self.update( env, i )
 		for ( k, v ) in env.attributes.items():
 			self.update( env, k )
@@ -385,7 +406,7 @@ class LookupFilter:
 
 	def fail( self, key ):
 		if self._error:
-			raise Exception( self._error )
+			raise Exception( self._error, key )
 		else:
 			return key
 

@@ -115,9 +115,7 @@ class ReparseParser:
 		return actions.Seq( *sofar )
 
 	def readHeader( self ):
-		self.mustReadToken( LexemeType.Keyword, '[' )
-		num = self.readNumLiteral()
-		self.mustReadToken( LexemeType.Keyword, ']' )
+		num = self.readColumn()
 		self.mustReadToken( LexemeType.Keyword, ':' )
 		self.mustReadToken( LexemeType.Symbol, 'Title' )
 		self.mustReadToken( LexemeType.Keyword, '=' )

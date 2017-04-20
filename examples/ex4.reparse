@@ -1,32 +1,34 @@
 # Parse a fixed format input consisting of two white-space padded fixed width 
 # fields. The file is top-and-tailed with lines that contain meta-info.
- 
+
 # Define the mapping from capture groups to columns; also naming and ordering the columns.
 # Note that D is the date captured in the header line.
 Header[D]: Title="Date"
 Header[2]: Title="Type"
 Header[1]: Title="Description"
- 
+
 # Set the output format.
 Output: Format="JSON"
 
-Table: Name="Offence", Error="Invalid Code"
+Table: Name="Offence", Error="Invalid Code Detected"
 Entry: Match=//013//, Value="Speed"
 Entry: Match=//014//, Value="Drunk"
- 
+Entry: Match=//015//, Value="Woot"
+
 # The first line of the file is expected to contain the date, which is captured 
 # and given the name D.
 Require //DATA FILE (.*)//
     Copy: From=[1], To=[D]
- 
+
 Until //END OF DATA//
     # While will repeatedly match records that fit the 30,10 fixed width format.
-    Print-Require //(.{30})(.{10})//
+    Require //(.{30})(.{0,10})//
         # Both capture groups have their whitespace trimmed.
         Transform[*]: Trim
         # The second capture group is expected to be 013 or 014 and has to be mapped.
         # A series of regex substitutions are applied.
         Transform[2]: Use-Table="Offence"
- 
+        Print
+
 # No further input is allowed.
 Done

@@ -98,5 +98,19 @@ def test_copy():
 	assert isinstance( p, actions.Seq ), type( p )
 	assert isinstance( p[0], actions.Copy ), type( p )	
 
+def test_multiline_comment():
+	text = (
+		'#This is a comment\n'
+		'\n'
+		'#And then another after a blank line\n'
+		'Header[1]: Title="huh"\n'
+	)
+	p = readStatements( text )
+	assert isinstance( p, actions.Seq ), type( p )
+	assert isinstance( p[0], actions.SetHeader ), type( p )	
+
+
+	
+
 if __name__ == "__main__":
     test_parse()
