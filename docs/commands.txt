@@ -49,7 +49,41 @@ and no options.
 
 Print-Repeat
 ------------
-TBD
+Syntax:
+
+	Print-Repeat REGEX
+		COMMANDS
+
+Equivalent to
+
+	Repeat REGEX
+		COMMANDS
+		Print
+
+
+Print-Require
+-------------
+Syntax:
+
+	Print-Require REGEX
+		COMMANDS
+
+Equivalent to
+
+	Require REGEX
+		COMMANDS
+		Print
+
+Repeat
+------
+Syntax:
+
+	Repeat REGEX
+		COMMANDS
+
+Repeatedly matches the next line to REGEX until the end of file and 
+executes the commands COMMANDS for each match. If a line does not match
+the REGEX then an error is raised.
 
 Require
 -------
@@ -116,4 +150,4 @@ REGEX, stopping if no match is possible, otherwise executing the commands
 COMMANDS with the match-groups bound.
 
 If the At-End=Break option is set then the loop will break if the end of input
-is encountered rather than a match for REGEX.
+is encountered rather than only breaking on a match for REGEX.

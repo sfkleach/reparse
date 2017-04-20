@@ -1,22 +1,22 @@
 /* n.b. Command also matches CommandPattern */
 Command ::= CopyCommand | DoneCommand | EntryCommand | HeaderCommand 
-          | PassCommand | PrintRepeatCommand | PrintCommand | RequireCommand 
-		  | TableCommand | TransformCommand | UntilCommand
+          | PassCommand | PrintCommand | RepeatCommand | RequireCommand 
+          | TableCommand | TransformCommand | UntilCommand
 
 CopyCommand ::= 'Copy' ':' CopyCommandArg ( ',' CopyCommandArg )*
-CopyCommandArg ::= ( 'From' | 'To' ) =' String
+CopyCommandArg ::= ( 'From' | 'To' ) '=' String
 DoneCommand ::= 'Done'
 EntryCommand ::= 'Entry' ':' EntryCommandArg ( ',' EntryCommandArg )*
 EntryCommandArg ::= 'Match' '=' Regex
 EntryCommandArg ::= 'Value' '=' String
 HeaderCommand ::= 'Header' Column ':' 'Title' '=' String
 PassCommand ::= 'Pass'
-PrintRepeatCommand ::= 'Print-Repeat' RegEx ( Indent Commands Outdent )?
+RepeatCommand ::= ( 'Repeat' | 'Print-Repeat' ) RegEx ( Indent Commands Outdent )?
+RequireCommand ::= ( 'Require' | 'Print-Require' ) RegEx ( Indent Commands Outdent )?
 PrintCommand ::= 'Print'
-RequireCommand ::= 'Require' RegEx ( Indent Commands Outdent )?
 TableCommand ::= 'Table' ':' TableCommandArg ( ',' TableCommandArg )*
 TableCommandArg ::= 'Name' '=' String
-TableCommandArg ::= Error' '=' String
+TableCommandArg ::= 'Error' '=' String
 TransformCommand ::= 'Transform' Column ':' Filter ( ',' Filter )*
 UntilCommand ::= 'Until' RegEx ( ':' 'At-End' '=' 'Break' )? ( Indent Commands Outdent )? 
 
