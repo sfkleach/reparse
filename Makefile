@@ -34,6 +34,8 @@ clean:
 # Will require admin password.
 .PHONEY: ubuntu-sdk
 ubuntu-sdk:
-	sudo apt-get install -y python3 rubygems
+	apt-get install -y python3 python3-pip rubygems
 	gem install asciidoctor
+	pip3 install --upgrade pip
+	pip3 install nose2
 

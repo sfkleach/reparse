@@ -1,12 +1,14 @@
 import enum
+import sys
 
+# TODO remove the conditional when 3.6+ becomes the default.
 class LexemeType( enum.Enum ):
-	Symbol = enum.auto()
-	StringLiteral = enum.auto()
-	RegexLiteral = enum.auto()
-	NumLiteral = enum.auto()
-	Indentation = enum.auto()
-	Keyword = enum.auto()
+	Symbol = enum.auto() if sys.hexversion >= 0x30600f0 else 0
+	StringLiteral = enum.auto() if sys.hexversion >= 0x30600f0 else 1
+	RegexLiteral = enum.auto() if sys.hexversion >= 0x30600f0 else 2
+	NumLiteral = enum.auto() if sys.hexversion >= 0x30600f0 else 3
+	Indentation = enum.auto() if sys.hexversion >= 0x30600f0 else 4
+	Keyword = enum.auto() if sys.hexversion >= 0x30600f0 else 5
 
 class Lexeme:
 
