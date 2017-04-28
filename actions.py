@@ -158,6 +158,12 @@ class Action:
 		for child in self.children():
 			child.show( level = level + 1 )
 
+	def withPrint( self, with_print ):
+		return Seq( self, Print() ).flatten() if with_print else self
+
+	def flattenInfo( self, accumulator ):
+		accumulator.append( self )
+
 class Copy( Action ):
 
 	def __init__( self, frm, to ):
@@ -279,6 +285,20 @@ class Seq( Action ):
 	def children( self ):
 		for i in self._children:
 			yield i
+
+	def flattenInto( self, sofar ):
+		for i in self._children:
+			i.flattenInfo( sofar )
+
+	def flatten( self ):
+		accumulator = []
+		self.flattenInfo( accumulator )
+		n = len( accumulator )
+		if n == 1:
+			return accumulator[ 0 ]
+		else:
+			return Seq( *accumulator )
+			
 
 class EndOfInput( Action ):
 

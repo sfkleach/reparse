@@ -122,14 +122,18 @@ class ReparseParser:
 		title = self.readStringLiteral()
 		return actions.SetHeader( title, num )
 
-	def readPrintRepeat( self ):
+	def readRepeat( self, with_print=False ):
 		regex = self.readRegexLiteral()
 		if self.tryReadIndent():
-			stmnts = self.readStatements()
+			body = self.readStatements().withPrint( with_print )
 			self.mustReadOutdent()
-			return actions.Repeat( regex, actions.Seq( stmnts, actions.Print() ) )
+			return actions.Repeat( regex, body )
 		else:
-			return actions.Repeat( regex, actions.Print() )
+			body = actions.Seq().withPrint( with_print )
+			return actions.Repeat( regex, body )
+
+	def readPrintRepeat( self ):
+		self.readRepeat( with_print=True )
 
 	def readPass( self ):
 		return actions.Seq()
@@ -188,14 +192,18 @@ class ReparseParser:
 		else:
 			return actions.Until( regex, actions.Seq(), break_at_end=break_at_end )
 
-	def readRequire( self ):
+	def readRequire( self, with_print = False ):
 		regex = self.readRegexLiteral()
 		if self.tryReadIndent():
-			stmnts = self.readStatements()
+			stmnts = self.readStatements().withPrint( with_print )
 			self.mustReadOutdent()
 			return actions.Require( regex, stmnts )
 		else:
-			return actions.Require( regex, actions.Seq() )
+			body = actions.Seq().withPrint( with_print )
+			return actions.Require( regex, body )
+
+	def readPrintRequire( self ):
+		self.readRequire( with_print = True )
 
 	def readPrint( self ):
 		return actions.Print()
@@ -290,6 +298,8 @@ PREFIX_TABLE = {
 	'Pass': ReparseParser.readPass,
 	'Print': ReparseParser.readPrint,
 	'Print-Repeat': ReparseParser.readPrintRepeat,
+	'Print-Require': ReparseParser.readPrintRequire,
+	'Repeat': ReparseParser.readRepeat,
 	'Require': ReparseParser.readRequire,
 	'Table': ReparseParser.readTable,
 	'Transform': ReparseParser.readTransform,

@@ -109,7 +109,15 @@ def test_multiline_comment():
 	assert isinstance( p, actions.Seq ), type( p )
 	assert isinstance( p[0], actions.SetHeader ), type( p )	
 
-
+def test_PrintRequire():
+	text = (
+		'Print-Require //EOF//\n'
+	)
+	p = readStatements( text )
+	assert isinstance( p, actions.Seq ), type( p )
+	assert len(p) == 2, len( p )
+	assert isinstance( p[0], actions.Require ), type( p )	
+	assert isinstance( p[1], actions.Print ), type( p )	
 	
 
 if __name__ == "__main__":

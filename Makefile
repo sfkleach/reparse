@@ -28,14 +28,19 @@ docs/%.html: docs/%.txt
 
 .PHONEY: clean
 clean:
+	mkdir -p _build
 	find _build -mindepth 1 -delete
 	rm -f $(DOCS)
 
 # Will require admin password.
-.PHONEY: ubuntu-sdk
-ubuntu-sdk:
-	apt-get install -y python3 python3-pip rubygems
+
+.PHONEY: sdk-ubuntu
+sdk-ubuntu:
+	apt-get install -y python3 python3-pip rubygems git
 	gem install asciidoctor
 	pip3 install --upgrade pip
 	pip3 install nose2
 
+.PHONEY: sdk-ubuntu-check
+sdk-ubuntu-check:
+	docker run --rm -v `pwd`:/tmp/reparse:ro ubuntu /bin/bash -c "apt-get update && apt-get upgrade -y && apt-get install -y git; git -C /tmp/reparse show HEAD:scripts/sdk-ubuntu-check.sh | /bin/bash"
