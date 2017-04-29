@@ -119,6 +119,32 @@ def test_PrintRequire():
 	assert isinstance( p[0], actions.Require ), type( p )
 	assert isinstance( p[0]._body, actions.Print )
 	
+def test_Repeat():
+	text = (
+		'Repeat //EOF//\n'
+	)
+	p = readStatements( text )
+	assert isinstance( p, actions.Seq ), type( p )
+	assert len(p) == 1, len( p )
+	assert isinstance( p[0], actions.Repeat ), type( p )
+	require = p[0]._body
+	assert isinstance( require, actions.Require )
+	body = require._body
+	assert isinstance( body, actions.Seq )
+	
+def test_PrintRepeat():
+	text = (
+		'Print-Repeat //EOF//\n'
+	)
+	p = readStatements( text )
+	assert isinstance( p, actions.Seq ), type( p )
+	assert len(p) == 1, len( p )
+	assert isinstance( p[0], actions.Repeat ), type( p )
+	require = p[0]._body
+	assert isinstance( require, actions.Require )
+	body = require._body
+	assert isinstance( body, actions.Print )
+	
 
 if __name__ == "__main__":
     test_parse()
