@@ -115,9 +115,9 @@ def test_PrintRequire():
 	)
 	p = readStatements( text )
 	assert isinstance( p, actions.Seq ), type( p )
-	assert len(p) == 2, len( p )
-	assert isinstance( p[0], actions.Require ), type( p )	
-	assert isinstance( p[1], actions.Print ), type( p )	
+	assert len(p) == 1, len( p )
+	assert isinstance( p[0], actions.Require ), type( p )
+	assert isinstance( p[0]._body, actions.Print )
 	
 
 if __name__ == "__main__":

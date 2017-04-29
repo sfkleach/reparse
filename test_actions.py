@@ -45,3 +45,13 @@ def test_Copy():
 	assert env.attributes;
 	assert 'D' in env.attributes
 	assert env.attributes[ 'D' ] == 'xyz'
+
+def test_flatten_noChange():
+	s2 = actions.Seq( actions.Print(), actions.Print() )
+	fs2 = s2.flatten()
+	assert s2._children == fs2._children
+
+def test_flatten_simplify():
+	s2 = actions.Seq( actions.Seq(), actions.Print() )
+	fs2 = s2.flatten()
+	assert isinstance( fs2, actions.Print )

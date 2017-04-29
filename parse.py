@@ -105,6 +105,7 @@ class ReparseParser:
 			return None
 
 	def readStatements( self ):
+		# print( 'READ STMNT' )
 		sofar = []
 		while True:
 			e = self.readCommand()
@@ -133,7 +134,7 @@ class ReparseParser:
 			return actions.Repeat( regex, body )
 
 	def readPrintRepeat( self ):
-		self.readRepeat( with_print=True )
+		return self.readRepeat( with_print=True )
 
 	def readPass( self ):
 		return actions.Seq()
@@ -193,17 +194,21 @@ class ReparseParser:
 			return actions.Until( regex, actions.Seq(), break_at_end=break_at_end )
 
 	def readRequire( self, with_print = False ):
+		# print( 'READ REQUIRE' )
 		regex = self.readRegexLiteral()
 		if self.tryReadIndent():
+			# print( 'INDENT' )
 			stmnts = self.readStatements().withPrint( with_print )
 			self.mustReadOutdent()
 			return actions.Require( regex, stmnts )
 		else:
+			# print( 'NO INDENT', with_print )
 			body = actions.Seq().withPrint( with_print )
+			# print( 'BODY', body._children )
 			return actions.Require( regex, body )
 
 	def readPrintRequire( self ):
-		self.readRequire( with_print = True )
+		return self.readRequire( with_print = True )
 
 	def readPrint( self ):
 		return actions.Print()
